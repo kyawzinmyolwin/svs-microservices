@@ -1,0 +1,34 @@
+<!-- # container-project/svs_microservices/frontend_service/templates/customer_detail.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Customer Details</h2>
+
+<div class="card mt-4">
+    <div class="container mt-4">
+<table class="table table-hover">
+            <thead class="table-success">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Actions123</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <td>{{ customer.customer_id }}</td>
+                    <td>{{ customer.first_name }} {{ customer.family_name }}</td>
+                    <td>{{ customer.email }}</td>
+                    <td>{{ customer.phone }}</td>
+                    <td><a href="/customers/{{ customer.customer_id }}" class="btn btn-primary btn-sm">Edit</a></td>
+                </tr>
+
+            </tbody>
+        </table>
+        <a href="/customers" class="btn btn-secondary mt-3">Back</a>
+    </div>
+</div>
+{% endblock %}

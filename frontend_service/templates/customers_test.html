@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Customers - SVS{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Customer List</h2>
+
+    <!-- Customer Search Form -->
+    <!-- <div class="bg-light p-4 rounded mb-4">
+        <form method="POST" action="{{ url_for('customer_search') }}">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="family_name" class="form-label">Family Name</label>
+                    <input type="text" class="form-control" id="family_name" name="family_name" 
+                           placeholder="Search by family name..." value="{{ family_name }}">
+                </div>
+            
+                <div class ="col-md-4 mb-3">
+                    <label for ="first_name" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name"
+                        placeholder="Search by first name..." value="{{ first_name }}">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <button type="submit" class="btn bg-svs-custom text-white me-2">
+                        Search
+                    </button>
+                    <a href="{{ url_for('customer_list') }}" class="btn btn-secondary me-2">
+                        Clear
+                    </a>
+                    <a href="{{ url_for('customer_add') }}" class="btn bg-svs-custom text-white me-2">
+                        Add Customer
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div> -->
+               
+    <!-- Search Results -->
+    {% if request.method == 'POST' %}
+        {% if customers %}
+        <div class="mb-4">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-success">
+                        <tr>
+                            <th>Customer Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th colspan="4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in customers %}
+                        <tr>
+                            <td><a href="{{ url_for('appointment_view', customer_id=customer.customer_id) }}" 
+                                    class="link-offset-2 link-underline link-underline-opacity-0" 
+                                    title="Click To Appointment Details">{{ customer.first_name }} {{ customer.family_name }}</a></td>
+                            <td>{{ customer.email }}</td>
+                            <td>{{ customer.phone }}</td>
+                            <td>
+                                <a href="{{ url_for('customer_edit', customer_id=customer.customer_id) }}" class="btn btn-sm bg-svs-custom text-white">Edit</a>
+                            </td>                        
+                        {% endfor %}                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            <h5 class="alert-heading">No customers found</h5>
+            <p>No name match your search criteria. Please try different search terms.</p>
+        </div>
+        {% endif %}
+    {% else %} 
+    <div class="alert alert-info" role="alert">
+        <h5 class="alert-heading">Welcome to Customer Search</h5>
+        <p>Use the search form above to find customers in our system. You can search by first, or last name. Leave all fields empty to see all customers.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

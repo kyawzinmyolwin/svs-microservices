@@ -1,0 +1,112 @@
+# customer_service/customer_app.py
+
+from flask import Flask, jsonify, request
+import db_connector
+
+app = Flask(__name__)
+db_connector.init_db(app)
+
+# ---------- DB LOGIC ----------
+
+def get_all_customers():
+    cursor = None
+    try:
+        cursor = db_connector.get_cursor()
+        cursor.execute("""
+            SELECT customer_id, first_name, family_name, email, phone
+            FROM customers
+        """)
+        return cursor.fetchall()
+    except Exception as e:
+        app.logger.exception("Error fetching customers")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+
+def get_customer_by_id(customer_id):
+    cursor = None
+    try:
+        cursor = db_connector.get_cursor()
+        cursor.execute("""
+            SELECT customer_id, first_name, family_name, email, phone
+            FROM customers
+            WHERE customer_id = %s
+        """, (customer_id,))
+        return cursor.fetchone()
+    except Exception:
+        app.logger.exception("Error fetching customer")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+
+def create_customer(data):
+    cursor = None
+    try:
+        cursor = db_connector.get_cursor()
+        cursor.execute("""
+            INSERT INTO customers (first_name, family_name, email, phone)
+            VALUES (%s, %s, %s, %s)
+        """, (
+            data["first_name"],
+            data["family_name"],
+            data["email"],
+            data.get("phone")
+        ))
+        return cursor.lastrowid
+    except Exception:
+        app.logger.exception("Error creating customer")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+
+# ---------- API ENDPOINTS ----------
+
+@app.route("/api/v1/customers", methods=["GET"])
+def list_customers():
+    customers = get_all_customers()
+    if customers is None:
+        return jsonify({"message": "Could not retrieve customers"}), 500
+
+    return jsonify({
+        "status": "success",
+        "count": len(customers),
+        "customers": customers
+    }), 200
+
+@app.route("/api/v1/customers/<int:customer_id>", methods=["GET"])
+def get_customer(customer_id):
+    customer = get_customer_by_id(customer_id)
+    if customer is None:
+        return jsonify({"message": "Customer not found"}), 404
+
+    return jsonify({
+        "status": "success",
+        "customer": customer
+    }), 200
+
+@app.route("/api/v1/customers", methods=["POST"])
+def create_customer_api():
+    data = request.get_json()
+
+    required = ["first_name", "family_name", "email"]
+    if not all(k in data for k in required):
+        return jsonify({"message": "Missing required fields"}), 400
+
+    customer_id = create_customer(data)
+    if customer_id is None:
+        return jsonify({"message": "Failed to create customer"}), 500
+
+    return jsonify({
+        "status": "success",
+        "customer_id": customer_id
+    }), 201
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "UP"}), 200
+
+if __name__ == "__main__":
+    app.run(port=5002, debug=True)

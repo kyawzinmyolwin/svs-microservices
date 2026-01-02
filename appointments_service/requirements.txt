@@ -1,0 +1,6 @@
+# catalog_service/requirements.txt
+
+Flask
+python-dotenv
+mysqlclient
+requests # Only needed if you were testing the monolith, but good practice

@@ -1,0 +1,64 @@
+<!-- # container-project/svs_microservices/frontend_service/templates/home.html -->
+{% extends "base.html" %}
+{% block title %}Home - SVS{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <!-- Welcome Section -->
+    <div class="welcome-section mb-5">
+        <div class="text-center">
+            <h2 class="mb-3">Nau mai! Welcome!!!</h2>
+            <h4 class="mb-3">Welcome to Selwyn Veterinary Services</h4>
+        </div>
+    </div>
+
+
+    <div class="container mt-4">
+
+
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                
+                <div class="hero-content">
+                    <h1 data-aos="fade-up" data-aos-delay="200">Transform Your Business Vision Into Reality</h1>
+                    <p data-aos="fade-up" data-aos-delay="300">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                        Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+                        nostrud exercitation ullamco laboris.</p>
+                    <div class="hero-cta" data-aos="fade-up" data-aos-delay="400">
+                        <a href="#about" class="btn-primary">Get Started Today</a>
+                        <a href="#https://www.youtube.com/watch?v=Y7f98aduVJ8" class="btn-secondary glightbox">
+                            <i class="bi bi-play-circle"></i>
+                            Watch Demo
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="text-center">
+
+                    <div
+                        class="d-flex align-items-center justify-content-center bg-light rounded shadow mb-3 book-cover-container">
+
+                        <img src="{{ url_for('static', filename='media-resources/candy-1.jpg') }}"
+                            class="img-fluid book-cover-image" onerror="this.src='/static/book-covers/Candy-1.jpg';">
+
+                        <img src="{{ url_for('static', filename='media-resources/candy-2.jpg') }}"
+                            class="img-fluid book-cover-image">
+
+                    </div>
+                    <h6 class="text-dark">Who We Are</h6>
+
+                </div>
+            </div>
+
+
+
+
+
+        </div>
+    </div>
+
+
+</div>
+{% endblock %}

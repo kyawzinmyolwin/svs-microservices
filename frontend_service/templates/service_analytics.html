@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Service Analytics{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2 class="mb-4">Service Usage and Revenue</h2>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-success">
+                <tr>
+                    <th>Service Name</th>
+                    <th>Price</th>
+                    <th>Total Times Used</th>
+                    <th>Total Revenue</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in service_stats %}
+                <tr>
+                    <td>{{ service.service_name }}</td>
+                    <td>${{ service.price }}</td>
+                    <td>{{ service.total_count_used }}</td>
+                    <td>
+                        {% if service.total_revenue %}
+                            ${{ service.total_revenue }}
+                        {% else %}
+                            $0.00
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

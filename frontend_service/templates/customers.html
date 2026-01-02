@@ -1,0 +1,33 @@
+<!-- # container-project/svs_microservices/frontend_service/templates/customers.html -->
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="mb-4">
+    <h2>Customers</h2>
+    <div class="container mt-4">
+        <table class="table table-hover">
+            <thead class="table-success">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th><a href="/customers/new" class="btn btn-primary btn-sm">Add</a></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in customers %}
+                <tr>
+                    <td>{{ c.customer_id }}</td>
+                    <td>{{ c.first_name }} {{ c.family_name }}</td>
+                    <td>{{ c.email }}</td>
+                    <td>{{ c.phone }}</td>
+                    <td><a href="/customers/{{ c.customer_id }}" class="btn btn-primary btn-sm">View Details</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

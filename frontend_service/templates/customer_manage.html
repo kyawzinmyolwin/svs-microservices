@@ -1,0 +1,88 @@
+<!-- # container-project/svs_microservices/frontend_service/templates/customer_manage.html -->
+{% extends "base.html" %}
+{% block title %}
+{% if is_edit %}Edit Customer{% else %}Add New Customer{% endif %} - SVS
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2 class="mb-4">
+        {% if is_edit %}Edit Customer{% else %}Add New Customer{% endif %}
+    </h2>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="bg-light p-4 rounded">
+
+                <form method="POST"
+                      action="{% if is_edit %}
+                                {{ url_for('update_customer_ui', id=customer.customer_id) }}
+                              {% else %}
+                                {{ url_for('create_customer_ui') }}
+                              {% endif %}">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">First Name *</label>
+                            <input type="text" class="form-control"
+                                   name="first_name"
+                                   value="{{ customer.first_name if customer else '' }}"
+                                   required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Family Name *</label>
+                            <input type="text" class="form-control"
+                                   name="family_name"
+                                   value="{{ customer.family_name if customer else '' }}"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control"
+                                   name="email"
+                                   value="{{ customer.email if customer else '' }}">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phone *</label>
+                            <input type="text" class="form-control"
+                                   name="phone"
+                                   value="{{ customer.phone if customer else '' }}"
+                                   required>
+                        </div>
+                                                <div class="col-md-6 mb-3">
+                            <label for="date_joined" class="form-label">Date Joined</label>
+                            <input type="datetime-local" class="form-control" id="date_joined" name="date_joined" 
+                                value="{{ customer.date_joined.strftime('%Y-%m-%dT%H:%M') if customer and customer.date_joined else '' }}" 
+                                placeholder="Enter Date Joined" maxlength="45" {% if is_edit %}readonly{% endif %}>
+                        </div>
+                    </div>
+
+                    {% if is_edit and customer.date_joined %}
+                    <div class="mb-3">
+                        <label class="form-label">Date Joined</label>
+                        <input type="text" class="form-control"
+                               value="{{ customer.date_joined }}"
+                               readonly>
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn bg-svs-custom text-white">
+                            {% if is_edit %}Update Customer{% else %}Create Customer{% endif %}
+                        </button>
+                        <a href="/customers" class="btn btn-secondary ms-2">Cancel</a>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

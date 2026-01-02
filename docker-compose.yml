@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  frontend_service:
+    build: ./frontend_service
+    ports:
+      - "5000:5000"
+    environment:
+      - CUSTOMER_SVC_URL=${CUSTOMER_SVC_URL}
+      - CATALOG_SVC_URL=${CATALOG_SVC_URL}
+      - APPOINTMENTS_SVC_URL=${APPOINTMENTS_SVC_URL}
+
+    depends_on:
+      - catalog_service
+      - customer_service
+      - appointments_service
+
+  catalog_service:
+    build: ./catalog_service
+    ports:
+      - "5001:5001"
+
+  customer_service:
+    build: ./customer_service
+    ports:
+      - "5002:5002"
+
+  appointments_service:
+    build: ./appointments_service
+    ports:
+      - "5003:5003"

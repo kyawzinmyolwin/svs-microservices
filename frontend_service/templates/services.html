@@ -1,0 +1,30 @@
+<!-- # container-project/svs_microservices/frontend_service/templates/services.html -->
+{% extends "base.html" %}
+
+{% block title %}Services - SVS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Services</h2>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-success">
+                <tr>
+                    <th>Service</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+        <tbody>
+            {% for service in services %}
+            <tr>
+                <td>{{ service.service_name }}</a></td>
+
+                <td>${{ service.price }} USD</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

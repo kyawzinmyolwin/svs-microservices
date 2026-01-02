@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Customers</h2>
+<div class="mb-4">
+    <div class="container mt-4">
+        <table class="table table-hover">
+            <thead class="table-success">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Actions123</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in customer %}
+                <tr>
+                    <td>{{ c.customer_id }}</td>
+                    <td>{{ c.first_name }} {{ c.family_name }}</td>
+                    <td>{{ c.email }}</td>
+                    <td>{{ c.phone }}</td>
+                    <td><a href="/customers/{{ c.customer_id }}" class="btn btn-primary btn-sm">Edit</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
