@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svs-service-frontend
+  namespace: svs-microservices
+spec:
+  selector:
+    app: svs-app-frontend
+  ports:
+    - port: 80        # ClusterIP port
+      targetPort: 5000
+  type: ClusterIP

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svs-service-customer
+  namespace: svs-microservices
+spec:
+  selector:
+    app: svs-app-customer
+  ports:
+    - port: 80        # ClusterIP port
+      targetPort: 5002
+  type: ClusterIP
