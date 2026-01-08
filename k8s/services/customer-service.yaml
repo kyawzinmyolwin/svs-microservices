@@ -7,6 +7,6 @@ spec:
   selector:
     app: svs-app-customer
   ports:
-    - port: 80        # ClusterIP port
+    - port: 5002        # ClusterIP port
       targetPort: 5002
   type: ClusterIP

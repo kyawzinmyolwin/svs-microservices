@@ -1,8 +1,3 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: svs-app-frontend
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,7 +15,7 @@ spec:
     spec:
       containers:
         - name: svs-app
-          image: piconet/svs_microservices-frontend_service:1.0.0
+          image: piconet/svs_microservices-frontend_service1.0.0:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
@@ -31,16 +26,19 @@ spec:
             limits:
               cpu: "250m"
               memory: "256Mi"
+          envFrom:
+            - configMapRef:
+                name: frontend-config
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: svs-service-frontend
-  namespace: svs-microservices
-spec:
-  selector:
-    app: svs-app-frontend
-  ports:
-    - port: 80        # ClusterIP port
-      targetPort: 5000
-  type: ClusterIP
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: svs-service-frontend
+#   namespace: svs-microservices
+# spec:
+#   selector:
+#     app: svs-app-frontend
+#   ports:
+#     - port: 80        # ClusterIP port
+#       targetPort: 5000
+#   type: ClusterIP
