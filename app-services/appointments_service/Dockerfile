@@ -1,5 +1,9 @@
 FROM python:3.11-slim
 
+# Adding multiple notes/metadata
+LABEL version="1.0.1"
+LABEL description="This build includes create function for appointment service."
+
 # Prevent Python from writing pyc files & buffering logs
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1

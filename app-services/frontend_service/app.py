@@ -118,6 +118,38 @@ def appointments_page():
     appointments = data["appointments"] if data else []
     return render_template("appointments.html", appointments=appointments)
 
+##########################################################
+@app.route("/appointments/new", methods=["GET", "POST"])
+def create_appointment_ui():
+    if request.method == "POST":
+        # Capture the list of service IDs and other form data [1, 7]
+        payload = {
+            "customer_id": request.form.get("customer_id"),
+            "appt_datetime": request.form.get("appt_datetime"),
+            "notes": request.form.get("notes"),
+            "service_ids": request.form.getlist("service_ids") # Important: getlist for multiple IDs
+        }
+        
+        # Forward to the Appointment Microservice [6, 8]
+        r = requests.post(f"{APPOINTMENT_SVC}/api/v1/appointments", json=payload)
+        
+        if r.status_code != 201:
+            flash(r.json().get("error", "Failed to create appointment"), "error")
+            return redirect(request.referrer)
+            
+        flash("Appointment scheduled successfully!", "success")
+        return redirect("/appointments")
+
+    # GET request: Fetch lists to populate dropdowns [9]
+    customers_data = fetch_json(f"{CUSTOMER_SVC}/api/v1/customers")
+    services_data = fetch_json(f"{CATALOG_SVC}/api/v1/services")
+    
+    customers = customers_data["customers"] if customers_data else []
+    services = services_data["services"] if services_data else []
+    
+    return render_template("appointments_add.html", customers=customers, services=services)
+##########################################################
+
 @app.route("/health")
 def health():
     return {"status": "UP"}, 200

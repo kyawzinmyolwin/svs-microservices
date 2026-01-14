@@ -103,6 +103,9 @@ def service_analytics_api():
 def get_service_by_id(service_id):
     return jsonify({"message": f"Service details for ID {service_id}"})
 
+# @app.route("/health")
+# def health():
+#     return {"status": "UP"}, 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)

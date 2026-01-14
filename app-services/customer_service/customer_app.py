@@ -201,5 +201,9 @@ def delete_customer(customer_id):
 
     return jsonify({"status": "deleted"})
 
+@app.route("/health")
+def health():
+    return {"status": "UP"}, 200
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002, debug=True)

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Add Appointment - SVS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Schedule New Appointment</h2>
+    
+    <form action="/appointments/new" method="POST">
+        <!-- 1. Select Customer -->
+        <div class="mb-3">
+            <label for="customer_id" class="form-label">Customer *</label>
+            <select name="customer_id" id="customer_id" class="form-select" required>
+                <option value="">-- Select a Customer --</option>
+                {% for customer in customers %}
+                <option value="{{ customer.customer_id }}">
+                    {{ customer.first_name }} {{ customer.family_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- 2. Date and Time -->
+        <div class="mb-3">
+            <label for="appt_datetime" class="form-label">Date & Time *</label>
+            <!-- Input format matches the expected %Y-%m-%dT%H:%M [3] -->
+            <input type="datetime-local" name="appt_datetime" id="appt_datetime" class="form-control" required>
+            <small class="text-muted">Note: We are closed on Sundays [4].</small>
+        </div>
+
+        <!-- 3. Select Services (Many-to-Many) -->
+        <div class="mb-3">
+            <label class="form-label">Services (Select at least one) *</label>
+            <div class="card p-3">
+                {% for service in services %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="service_ids" 
+                           value="{{ service.service_id }}" id="service_{{ service.service_id }}">
+                    <label class="form-check-label" for="service_{{ service.service_id }}">
+                        {{ service.service_name }} (${{ service.price }})
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 4. Notes -->
+        <div class="mb-3">
+            <label for="notes" class="form-label">Notes</label>
+            <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="Additional details..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create Appointment</button>
+        <a href="/appointments" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}
