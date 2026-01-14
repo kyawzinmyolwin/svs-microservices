@@ -7,6 +7,6 @@ spec:
   selector:
     app: svs-app-customer
   ports:
-    - port: 5002        # ClusterIP port
-      targetPort: 5002
+    - port: 5002        # I'm (svs-service-customer) listening on port 5002. Whoever access to http://svs-service-customer:5002 I'll forward the request according to my tartgetPort.
+      targetPort: 5002 #Container (svs-app-customer) is listening on port 5002
   type: ClusterIP

@@ -7,4 +7,4 @@ data:
   CUSTOMER_SVC_URL: "http://svs-service-customer:5002"
   CATALOG_SVC_URL: "http://svs-service-catalog:5001"
   APPOINTMENT_SVC_URL: "http://svs-service-appointment:5003"
-  FLASK_SECRET_KEY: "dev-secret-key"
+  # FLASK_SECRET_KEY: "dev-secret-key"
