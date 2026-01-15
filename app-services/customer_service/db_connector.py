@@ -1,4 +1,4 @@
-# catalog_service/db_connector.py
+# customer_service/db_connector.py
 
 from flask import g
 import MySQLdb
@@ -7,11 +7,11 @@ import db_config # Import local config
 
 # Database connection parameters for the CatalogDB
 connection_params = {
-    "user": db_config.CATALOG_DB_USER,
-    "password": db_config.CATALOG_DB_PASS,
-    "host": db_config.CATALOG_DB_HOST,
-    "database": db_config.CATALOG_DB_NAME,
-    "port": db_config.CATALOG_DB_PORT,
+    "user": db_config.CUSTOMER_DB_USER,
+    "password": db_config.CUSTOMER_DB_PASS,
+    "host": db_config.CUSTOMER_DB_HOST,
+    "database": db_config.CUSTOMER_DB_NAME,
+    "port": db_config.CUSTOMER_DB_PORT,
     "autocommit": True,
     "connect_timeout": 5,
 }

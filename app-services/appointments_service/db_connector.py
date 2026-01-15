@@ -5,13 +5,13 @@ import MySQLdb
 from MySQLdb import cursors
 import db_config # Import local config
 
-# Database connection parameters for the CatalogDB
+# Database connection parameters for the APPOINTMENTDB
 connection_params = {
-    "user": db_config.CATALOG_DB_USER,
-    "password": db_config.CATALOG_DB_PASS,
-    "host": db_config.CATALOG_DB_HOST,
-    "database": db_config.CATALOG_DB_NAME,
-    "port": db_config.CATALOG_DB_PORT,
+    "user": db_config.APPOINTMENT_DB_USER,
+    "password": db_config.APPOINTMENT_DB_PASS,
+    "host": db_config.APPOINTMENT_DB_HOST,
+    "database": db_config.APPOINTMENT_DB_NAME,
+    "port": db_config.APPOINTMENT_DB_PORT,
     "autocommit": True,
     "connect_timeout": 5,
 }
