@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svs-service-appointment
+  namespace: svs-microservices
+spec:
+  selector:
+    app: svs-app-appointment
+  ports:
+    - port: 5003       # I'm (svs-service-appointment) listening on port 5003. Whoever access to http://svs-service-appointment:5003 I'll forward the request according to my tartgetPort.
+      targetPort: 5003 #Container (svs-app-appointment) is listening on port 5003
+  type: ClusterIP
