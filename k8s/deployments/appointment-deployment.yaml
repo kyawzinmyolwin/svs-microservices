@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: svs-app
-          image: piconet/svs_microservices-appointments_service_temp:temp #piconet/svs_microservices-appointments_service:1.0.1
+          image: piconet/svs_microservices-appointments_service:1.0.1 #piconet/svs_microservices-appointments_service_temp:temp
           imagePullPolicy: Always
           ports:
             - containerPort: 5003

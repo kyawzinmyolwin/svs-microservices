@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: svs-app
-          image: piconet/svs_microservices-frontend_service1.0.0:latest
+          image: piconet/svs_microservices-frontend_service:1.0.1
           imagePullPolicy: Always
           ports:
             - containerPort: 5000

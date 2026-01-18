@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-config
+  namespace: logging
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush        1
+        Log_Level    info
+        Parsers_File parsers.conf
+
+    [INPUT]
+        Name              tail
+        Path              /var/log/containers/*.log
+        Parser            cri
+        Tag               kube.*
+        Refresh_Interval  5
+
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Kube_Tag_Prefix     kube.var.log.containers.
+        Merge_Log           On
+        Keep_Log            Off
+
+    [OUTPUT]
+        Name              loki
+        Match             kube.*
+        Host              loki.logging.svc.cluster.local
+        Port              3100
+        Labels            job=fluentbit,namespace=$kubernetes['namespace_name'],pod=$kubernetes['pod_name'],container=$kubernetes['container_name'],app=$kubernetes['labels']['app']
+
+  parsers.conf: |
+    [PARSER]
+        Name   cri
+        Format regex
+        Regex  ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<log>.*)$
+        Time_Key time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L%z
