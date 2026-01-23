@@ -210,3 +210,4 @@ db_config.py
 #Kubernetes
 .kube/
 .secret/
+appointment-db-secret.yaml
