@@ -23,7 +23,7 @@ Frontend → Backend Service → Database Service
 - Internal DNS-based service discovery
 - REST API communication
 - Real-world troubleshooting scenarios
-- Add Github Runner for local pipeline testing.
+- Add Github Runner for local pipeline testing...
 
 ## 📦 Kubernetes Resources
 - Deployments
