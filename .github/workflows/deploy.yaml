@@ -5,8 +5,8 @@ on:
     branches: [ "main" ]  # Trigger on every push to main
 
 jobs:
-  build-and-push:
-    runs-on: self-hosted  # <--- Targets your Vagrant container
+  build-and-push-test:
+    runs-on: [self-hosted, linux, x64]  # <--- Targets your Vagrant container
     
     steps:
       - name: Checkout Code
