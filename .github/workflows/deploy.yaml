@@ -15,7 +15,9 @@ jobs:
       - name: Build Docker Image
         # Using the Devbox IP for the registry tag
         run: |
-          docker build -t 192.168.56.86:5000/frontend-service:${{ github.sha }} .
+          docker build -t \
+          192.168.56.86:5000/frontend-service:${{ github.sha }} \
+          -f app-services/frontend_service/Dockerfile .
           docker tag 192.168.56.86:5000/frontend-service:${{ github.sha }} 192.168.56.86:5000/frontend-service:latest
 
       - name: Push to Local Registry
