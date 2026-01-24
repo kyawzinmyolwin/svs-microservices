@@ -33,11 +33,19 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # - name: Update Deployment Image
+      #   # This replaces the image tag in your YAML with the specific Git SHA
+      #   run: |
+      #     sed -i 's|image: .*|image: localhost:5000/frontend-service:${{ github.sha }}|g' k8s/deployments/frontend-deployment.yaml
       - name: Update Deployment Image
-        # This replaces the image tag in your YAML with the specific Git SHA
         run: |
-          sed -i 's|image: .*|image: localhost:5000/frontend-service:${{ github.sha }}|g' k8s/deployments/frontend-deployment.yaml
-
+          echo "--- BEFORE SED ---"
+          grep "image:" k8s/deployments/frontend-deployment.yaml
+          
+          sed -i "s|image:.*|image: localhost:5000/frontend-service:${{ github.sha }}|g" k8s/deployments/frontend-deployment.yaml
+          
+          echo "--- AFTER SED ---"
+          grep "image:" k8s/deployments/frontend-deployment.yaml
       # - name: Deploy to Cluster
       #   run: |
       #     kubectl apply -f k8s/deployments/frontend-deployment.yaml
