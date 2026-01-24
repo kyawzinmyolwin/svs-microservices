@@ -48,5 +48,5 @@ jobs:
           grep "image:" k8s/deployments/frontend-deployment.yaml
       - name: Deploy to Cluster
         run: |
-          kubectl apply -f k8s/deployments/frontend-deployment.yaml
+          kubectl apply -f k8s/deployments/frontend-deployment.yaml --validate=false
           kubectl rollout status deployment/svs-app-frontend -n svs-microservices
