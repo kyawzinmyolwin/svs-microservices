@@ -36,7 +36,7 @@ jobs:
       - name: Update Deployment Image
         # This replaces the image tag in your YAML with the specific Git SHA
         run: |
-          sed -i 's|image: .*|image: localhost:5000/frontend-service:${{ github.sha }}|g' k8s/deployment.yaml
+          sed -i 's|image: .*|image: localhost:5000/frontend-service:${{ github.sha }}|g' k8s/deployments/frontend-deployment.yaml
 
       - name: Deploy to Cluster
         run: |
