@@ -16,14 +16,14 @@ jobs:
         # Using the Devbox IP for the registry tag
         run: |
           docker build -t \
-          localhost:5000/frontend-service:${{ github.sha }} \
+          192.168.56.85:5000/frontend-service:${{ github.sha }} \
           -f app-services/frontend_service/Dockerfile .
-          docker tag localhost:5000/frontend-service:${{ github.sha }} localhost:5000/frontend-service:latest
+          docker tag 192.168.56.85:5000/frontend-service:${{ github.sha }} 192.168.56.85:5000/frontend-service:latest
 
       - name: Push to Local Registry
         run: |
-          docker push localhost:5000/frontend-service:${{ github.sha }}
-          docker push localhost:5000/frontend-service:latest
+          docker push 192.168.56.85:5000/frontend-service:${{ github.sha }}
+          docker push 192.168.56.85:5000/frontend-service:latest
 
   deploy-to-k8s:
     needs: build-and-push-test
@@ -42,7 +42,7 @@ jobs:
           echo "--- BEFORE SED ---"
           grep "image:" k8s/deployments/frontend-deployment.yaml
           
-          sed -i "s|image:.*|image: localhost:5000/frontend-service:${{ github.sha }}|g" k8s/deployments/frontend-deployment.yaml
+          sed -i "s|image:.*|image: 192.168.56.85:5000/frontend-service:${{ github.sha }}|g" k8s/deployments/frontend-deployment.yaml
           
           echo "--- AFTER SED ---"
           grep "image:" k8s/deployments/frontend-deployment.yaml
