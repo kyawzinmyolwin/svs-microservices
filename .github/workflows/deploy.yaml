@@ -16,14 +16,14 @@ jobs:
         # Using the Devbox IP for the registry tag
         run: |
           docker build -t \
-          192.168.56.86:5000/frontend-service:${{ github.sha }} \
+          localhost:5000/frontend-service:${{ github.sha }} \
           -f app-services/frontend_service/Dockerfile .
-          docker tag 192.168.56.86:5000/frontend-service:${{ github.sha }} 192.168.56.86:5000/frontend-service:latest
+          docker tag localhost:5000/frontend-service:${{ github.sha }} localhost:5000/frontend-service:latest
 
       - name: Push to Local Registry
         run: |
-          docker push 192.168.56.86:5000/frontend-service:${{ github.sha }}
-          docker push 192.168.56.86:5000/frontend-service:latest
+          docker push localhost:5000/frontend-service:${{ github.sha }}
+          docker push localhost:5000/frontend-service:latest
 
   # deploy-to-k8s:
   #   needs: build-and-push
