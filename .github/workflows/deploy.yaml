@@ -10,7 +10,7 @@ jobs:
     runs-on: self-hosted
     outputs:
       frontend: ${{ steps.filter.outputs.frontend }}
-      catalogue: ${{ steps.filter.outputs.catalogue }}
+      catalogue: ${{ steps.filter.outputs.catalog }}
       appointment: ${{ steps.filter.outputs.appointment }}
       customer: ${{ steps.filter.outputs.customer }}
     steps:
@@ -36,16 +36,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: frontend-service
+          - name: frontend_service
             path: app-services/frontend_service
             enabled: ${{ needs.detect-changes.outputs.frontend }}
-          - name: catalogue-service
+          - name: catalog_service
             path: app-services/catalog_service
-            enabled: ${{ needs.detect-changes.outputs.catalogue }}
-          - name: appointment-service
+            enabled: ${{ needs.detect-changes.outputs.catalog }}
+          - name: appointment_service
             path: app-services/appointments_service
             enabled: ${{ needs.detect-changes.outputs.appointment }}
-          - name: customer-service
+          - name: customer_service
             path: app-services/customer_service
             enabled: ${{ needs.detect-changes.outputs.customer }}
 
