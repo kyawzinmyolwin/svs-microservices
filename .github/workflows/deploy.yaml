@@ -42,7 +42,7 @@ jobs:
           - name: catalog_service
             path: app-services/catalog_service
             enabled: ${{ needs.detect-changes.outputs.catalog }}
-          - name: appointment_service
+          - name: appointments_service
             path: app-services/appointments_service
             enabled: ${{ needs.detect-changes.outputs.appointment }}
           - name: customer_service
