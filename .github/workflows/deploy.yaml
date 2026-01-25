@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker Image
-        working-dir: ./svs-microservices
+        working-directory: ./svs-microservices
         # Using the Devbox IP for the registry tag
         run: |
           docker build -t \
