@@ -67,9 +67,9 @@ jobs:
       - name: Update Kubernetes YAML
         # We go back to root context (no working-directory) to find the k8s folder
         run: |
-          DEPLOY_FILE="k8s/deployments/${{ matrix.service }}-deployment.yaml"
-          IMAGE_TAG="192.168.56.85:5000/${{ matrix.service }}:${{ github.sha }}"
-          
+          DEPLOY_FILE="k8s/deployments/${{ matrix.name }}-deployment.yaml"
+          IMAGE_TAG="192.168.56.85:5000/${{ matrix.name }}:${{ github.sha }}"
+
           # Update the image in the specific service deployment file
           sed -i "s|image:.*|image: $IMAGE_TAG|g" $DEPLOY_FILE
 
