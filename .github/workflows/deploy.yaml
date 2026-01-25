@@ -1,29 +1,68 @@
-name: Deploy Microservices
+name: Build & Deploy Services
 
 on:
   push:
     branches: [ main ]
+  pull_request:
 
 jobs:
-  build-and-deploy:
+  detect-changes:
+    runs-on: self-hosted
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      catalogue: ${{ steps.filter.outputs.catalogue }}
+      appointment: ${{ steps.filter.outputs.appointment }}
+      customer: ${{ steps.filter.outputs.customer }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect changed services
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - app-services/frontend_service/**
+            catalogue:
+              - app-services/catalog_service/**
+            appointment:
+              - app-services/appointments_service/**
+            customer:
+              - app-services/customer_service/**
+
+  build-and-push:
+    needs: detect-changes
     runs-on: self-hosted
     strategy:
-      # This runs the same steps for each item in the list
       matrix:
-        service: [frontend_service, catalog_service, customer_service, appointments_service]
-    
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+        include:
+          - name: frontend-service
+            path: app-services/frontend_service
+            enabled: ${{ needs.detect-changes.outputs.frontend }}
+          - name: catalogue-service
+            path: app-services/catalog_service
+            enabled: ${{ needs.detect-changes.outputs.catalogue }}
+          - name: appointment-service
+            path: app-services/appointments_service
+            enabled: ${{ needs.detect-changes.outputs.appointment }}
+          - name: customer-service
+            path: app-services/customer_service
+            enabled: ${{ needs.detect-changes.outputs.customer }}
 
-      - name: Build and Push Image
-        # Dynamically sets the folder based on the matrix item
-        working-directory: app-services/${{ matrix.service }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build & push ${{ matrix.name }}
+        if: matrix.enabled == 'true'
         run: |
-          IMAGE_NAME="192.168.56.85:5000/${{ matrix.service }}:${{ github.sha }}"
-          
-          docker build -t $IMAGE_NAME -f Dockerfile .
-          docker push $IMAGE_NAME
+          echo "Building ${{ matrix.name }}"
+
+          docker build \
+            -t 192.168.56.85:5000/${{ matrix.name }}:${{ github.sha }} \
+            -f ${{ matrix.path }}/Dockerfile \
+            ${{ matrix.path }}
+
+          docker push 192.168.56.85:5000/${{ matrix.name }}:${{ github.sha }}
 
       - name: Update Kubernetes YAML
         # We go back to root context (no working-directory) to find the k8s folder
@@ -36,4 +75,4 @@ jobs:
 
       - name: Deploy to Cluster
         run: |
-          kubectl apply -f k8s/deployments/${{ matrix.service }}-deployment.yaml
+          kubectl apply -f k8s/deployments/${{ matrix.name }}-deployment.yaml
