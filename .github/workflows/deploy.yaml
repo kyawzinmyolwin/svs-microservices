@@ -13,11 +13,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker Image
-              working-directory: ./app-services/frontend_service
+        working-directory: ./app-services/frontend_service
         run: |
-          # We are now inside app-services/frontend_service
-          # -f Dockerfile: looks in current folder
-          # . : uses current folder as context (finds requirements.txt)
           docker build \
             -t 192.168.56.85:5000/frontend-service:${{ github.sha }} \
             -f Dockerfile .
