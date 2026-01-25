@@ -10,7 +10,7 @@ jobs:
     strategy:
       # This runs the same steps for each item in the list
       matrix:
-        service: [frontend_service, catalogue_service, customer_service, appointment_service]
+        service: [frontend_service, catalog_service, customer_service, appointments_service]
     
     steps:
       - name: Checkout Code
@@ -18,7 +18,7 @@ jobs:
 
       - name: Build and Push Image
         # Dynamically sets the folder based on the matrix item
-        working-directory: ./app-services/${{ matrix.service }}
+        working-directory: app-services/${{ matrix.service }}
         run: |
           IMAGE_NAME="192.168.56.85:5000/${{ matrix.service }}:${{ github.sha }}"
           
