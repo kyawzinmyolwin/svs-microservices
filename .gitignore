@@ -211,3 +211,5 @@ db_config.py
 .kube/
 .secret/
 appointment-db-secret.yaml
+
+.github/github-runner-custom/
