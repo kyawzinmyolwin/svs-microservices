@@ -119,7 +119,7 @@ def list_customers():
 def get_customer(customer_id):
     customer = fetch_customer_by_id(customer_id)
     if not customer:
-        return jsonify({"message": "Customer not found"}), 404
+        return jsonify({"message": "Customer not found!!"}), 404
     return jsonify(customer)
 
 ########################################################
