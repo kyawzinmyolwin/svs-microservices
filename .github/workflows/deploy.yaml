@@ -65,6 +65,7 @@ jobs:
           docker push 192.168.56.85:5000/${{ matrix.name }}:${{ github.sha }}
 
       - name: Update Kubernetes YAML
+        if: matrix.enabled == 'true'
         # We go back to root context (no working-directory) to find the k8s folder
         run: |
           DEPLOY_FILE="k8s/deployments/${{ matrix.name }}-deployment.yaml"
@@ -74,5 +75,6 @@ jobs:
           sed -i "s|image:.*|image: $IMAGE_TAG|g" $DEPLOY_FILE
 
       - name: Deploy to Cluster
+        if: matrix.enabled == 'true'
         run: |
           kubectl apply -f k8s/deployments/${{ matrix.name }}-deployment.yaml
