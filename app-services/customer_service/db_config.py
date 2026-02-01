@@ -3,8 +3,8 @@ import os
 
 # Using environment variables for better security and flexibility
 
-CUSTOMER_DB_USER = os.getenv("CUSTOMER_DB_USER", "customers_user")
-CUSTOMER_DB_PASS = os.getenv("CUSTOMER_DB_PASS", "CustomersP@ss")
+CUSTOMER_DB_USER = os.getenv("CUSTOMER_DB_USER")
+CUSTOMER_DB_PASS = os.getenv("CUSTOMER_DB_PASS")
 CUSTOMER_DB_HOST = os.getenv("CUSTOMER_DB_HOST", "localhost")
 CUSTOMER_DB_PORT = int(os.getenv("CUSTOMER_DB_PORT", 3306))
 CUSTOMER_DB_NAME = os.getenv("CUSTOMER_DB_NAME", "customers_svs")
