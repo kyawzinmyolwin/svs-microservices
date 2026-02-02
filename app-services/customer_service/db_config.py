@@ -1,13 +1,25 @@
 # catalog_service/db_config.py
 import os
 
-# Using environment variables for better security and flexibility
+# Database connection config for Vault integration
+with open("/vault/secrets/db-creds") as f:
+    for line in f:
+        key, value = line.strip().split("=")
+        os.environ[key] = value
 
-CUSTOMER_DB_USER = os.getenv("CUSTOMER_DB_USER")
-CUSTOMER_DB_PASS = os.getenv("CUSTOMER_DB_PASS")
+db_user = os.getenv("DB_USERNAME")
+db_pass = os.getenv("DB_PASSWORD")
 CUSTOMER_DB_HOST = os.getenv("CUSTOMER_DB_HOST", "localhost")
 CUSTOMER_DB_PORT = int(os.getenv("CUSTOMER_DB_PORT", 3306))
 CUSTOMER_DB_NAME = os.getenv("CUSTOMER_DB_NAME", "customers_svs")
+
+# Using environment variables for better security and flexibility
+
+# CUSTOMER_DB_USER = os.getenv("CUSTOMER_DB_USER")
+# CUSTOMER_DB_PASS = os.getenv("CUSTOMER_DB_PASS")
+# CUSTOMER_DB_HOST = os.getenv("CUSTOMER_DB_HOST", "localhost")
+# CUSTOMER_DB_PORT = int(os.getenv("CUSTOMER_DB_PORT", 3306))
+# CUSTOMER_DB_NAME = os.getenv("CUSTOMER_DB_NAME", "customers_svs")
 
 # Database connection configuration for the CATALOG SERVICE
 # CATALOG_DB_USER = "customers_user"  # <--- CHANGED
