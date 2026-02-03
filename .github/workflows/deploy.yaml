@@ -10,7 +10,7 @@ jobs:
     runs-on: self-hosted
     outputs:
       frontend: ${{ steps.filter.outputs.frontend }}
-      catalogue: ${{ steps.filter.outputs.catalog }}
+      catalog: ${{ steps.filter.outputs.catalog }}
       appointment: ${{ steps.filter.outputs.appointment }}
       customer: ${{ steps.filter.outputs.customer }}
     steps:
@@ -23,7 +23,7 @@ jobs:
           filters: |
             frontend:
               - app-services/frontend_service/**
-            catalogue:
+            catalog:
               - app-services/catalog_service/**
             appointment:
               - app-services/appointments_service/**
