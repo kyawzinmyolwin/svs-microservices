@@ -6,9 +6,20 @@ from MySQLdb import cursors
 import db_config # Import local config
 
 # Database connection parameters for the CatalogDB
+# connection_params = {
+#     "user": db_config.CATALOG_DB_USER,
+#     "password": db_config.CATALOG_DB_PASS,
+#     "host": db_config.CATALOG_DB_HOST,
+#     "database": db_config.CATALOG_DB_NAME,
+#     "port": db_config.CATALOG_DB_PORT,
+#     "autocommit": True,
+#     "connect_timeout": 5,
+# }
+
+# Database connection parameters for the CatalogDB
 connection_params = {
-    "user": db_config.CATALOG_DB_USER,
-    "password": db_config.CATALOG_DB_PASS,
+    "user": db_config.db_user,
+    "password": db_config.db_pass,
     "host": db_config.CATALOG_DB_HOST,
     "database": db_config.CATALOG_DB_NAME,
     "port": db_config.CATALOG_DB_PORT,
