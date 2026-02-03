@@ -25,7 +25,7 @@ spec:
       serviceAccountName: svs-app-sa
       containers:
         - name: svs-app
-          image: piconet/svs_microservices-customer_service:1.0.0
+          image: 192.168.56.85:5000/customer_vault_test
           imagePullPolicy: Always
           ports:
             - containerPort: 5002
