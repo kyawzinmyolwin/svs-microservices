@@ -8,9 +8,9 @@ with open("/vault/secrets/db-creds") as f:
 
 db_user = os.getenv("DB_USERNAME")
 db_pass = os.getenv("DB_PASSWORD")
-CUSTOMER_DB_HOST = os.getenv("CATALOG_DB_HOST", "localhost")
-CUSTOMER_DB_PORT = int(os.getenv("CATALOG_DB_PORT", 3306))
-CUSTOMER_DB_NAME = os.getenv("CATALOG_DB_NAME", "catalog_svs")
+CATALOG_DB_HOST = os.getenv("CATALOG_DB_HOST", "localhost")
+CATALOG_DB_PORT = int(os.getenv("CATALOG_DB_PORT", 3306))
+CATALOG_DB_NAME = os.getenv("CATALOG_DB_NAME", "catalog_svs")
 
 # Database connection configuration for the CATALOG SERVICE
 # CATALOG_DB_USER = "catalog_user"  # <--- CHANGED
