@@ -7,3 +7,5 @@
 - Integrate Vault Injection into Kubernetes Cluster
 - Lost kubernetes auth in vault pod due to Dev Mode and Vagrant restart
 
+# 6 Feb 2026
+- Configuring Vault Dynamic Secrets for Customer Service.
