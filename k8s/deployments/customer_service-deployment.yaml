@@ -12,15 +12,25 @@ spec:
     metadata:
       labels:
         app: svs-app-customer
+      # annotations:
+      #   vault.hashicorp.com/agent-inject: "true"
+      #   vault.hashicorp.com/role: "svs-role"
+      #   vault.hashicorp.com/agent-inject-secret-db-creds: "secret/data/svs/db"
+      #   vault.hashicorp.com/agent-inject-template-db-creds: |
+      #     {{- with secret "secret/data/svs/db" -}}
+      #     DB_USERNAME={{ .Data.data.username }}
+      #     DB_PASSWORD={{ .Data.data.password }}
+      #     {{- end }}        
       annotations:
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/role: "svs-role"
-        vault.hashicorp.com/agent-inject-secret-db-creds: "secret/data/svs/db"
+        vault.hashicorp.com/agent-inject-secret-db-creds: "database/creds/svs-customer-role"
         vault.hashicorp.com/agent-inject-template-db-creds: |
-          {{- with secret "secret/data/svs/db" -}}
-          DB_USERNAME={{ .Data.data.username }}
-          DB_PASSWORD={{ .Data.data.password }}
-          {{- end }}        
+          {{- with secret "database/creds/svs-customer-role" -}}
+          DB_USERNAME={{ .Data.username }}
+          DB_PASSWORD={{ .Data.password }}
+          {{- end }}
+        vault.hashicorp.com/agent-inject-command-db-config: "kill -HUP 1"                 
     spec:
       serviceAccountName: svs-app-sa
       containers:
@@ -40,4 +50,13 @@ spec:
             # - secretRef:
             #     name: customer-db-secret
             - configMapRef:
-                name: customer-config              
+                name: customer-config
+          # command:
+          #   - /bin/sh
+          #   - -c
+          #   - |
+          #     until [ -f /vault/secrets/db-creds ]; do
+          #       echo "Waiting for Vault secrets..."
+          #       sleep 2
+          #     done
+          #     exec python app.py                              
