@@ -1,56 +1,62 @@
-# customer_service/db_connector.py
-
+# db_connector.py
 from flask import g
 import MySQLdb
 from MySQLdb import cursors
-import db_config # Import local config
+from MySQLdb import OperationalError
+import db_config
 
-# Database connection parameters for the CatalogDB
-# connection_params = {
-#     "user": db_config.CUSTOMER_DB_USER,
-#     "password": db_config.CUSTOMER_DB_PASS,
-#     "host": db_config.CUSTOMER_DB_HOST,
-#     "database": db_config.CUSTOMER_DB_NAME,
-#     "port": db_config.CUSTOMER_DB_PORT,
-#     "autocommit": True,
-#     "connect_timeout": 5,
-# }
 
-# Database connection for Vault integration
-connection_params = {
-    "user": db_config.db_user,
-    "password": db_config.db_pass,
-    "host": db_config.CUSTOMER_DB_HOST,
-    "database": db_config.CUSTOMER_DB_NAME,
-    "port": db_config.CUSTOMER_DB_PORT,
-    "autocommit": True,
-    "connect_timeout": 5,
-}
+def get_connection_params():
+    creds = db_config.load_db_creds()
+
+    return {
+        "user": creds["DB_USERNAME"],
+        "password": creds["DB_PASSWORD"],
+        "host": db_config.CUSTOMER_DB_HOST,
+        "database": db_config.CUSTOMER_DB_NAME,
+        "port": db_config.CUSTOMER_DB_PORT,
+        "autocommit": True,
+        "connect_timeout": 5,
+    }
+
 
 def check_db_health():
     try:
-        db = MySQLdb.connect(**connection_params)
+        db = MySQLdb.connect(**get_connection_params())
         db.close()
         return True
     except Exception:
         return False
 
+
 def init_db(app):
-    """Initialize app context teardown."""
     app.teardown_appcontext(close_db)
 
+
 def get_db():
-    """Get MySQL database connection for current request."""
-    if "db" not in g:
-        g.db = MySQLdb.connect(**connection_params)
-    return g.db
+    try:
+        if "db" not in g:
+            g.db = MySQLdb.connect(**get_connection_params())
+        return g.db
+
+    except OperationalError as e:
+        # MySQL auth failure codes
+        if e.args[0] in (1044, 1045):
+            # Credentials expired → reconnect with fresh Vault creds
+            if "db" in g:
+                g.db.close()
+                g.pop("db", None)
+
+            g.db = MySQLdb.connect(**get_connection_params())
+            return g.db
+
+        raise
 
 def get_cursor():
-    """Get a new MySQL dictionary cursor for current request."""
     return get_db().cursor(cursorclass=cursors.DictCursor)
 
+
 def close_db(exception=None):
-    """Close database connection at end of request."""
     db = g.pop("db", None)
     if db is not None:
         db.close()

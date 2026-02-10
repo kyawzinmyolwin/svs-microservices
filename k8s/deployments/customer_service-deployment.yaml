@@ -30,12 +30,12 @@ spec:
           DB_USERNAME={{ .Data.username }}
           DB_PASSWORD={{ .Data.password }}
           {{- end }}
-        vault.hashicorp.com/agent-inject-command-db-config: "kill -HUP 1"                 
+        # vault.hashicorp.com/agent-inject-command-db-config: "kill -HUP 1"                 
     spec:
       serviceAccountName: svs-app-sa
       containers:
         - name: svs-app
-          image: 192.168.56.85:5000/customer_vault_test
+          image: 192.168.56.85:5000/customer_vault_test_v5
           imagePullPolicy: Always
           ports:
             - containerPort: 5002
@@ -51,12 +51,12 @@ spec:
             #     name: customer-db-secret
             - configMapRef:
                 name: customer-config
-          # command:
-          #   - /bin/sh
-          #   - -c
-          #   - |
-          #     until [ -f /vault/secrets/db-creds ]; do
-          #       echo "Waiting for Vault secrets..."
-          #       sleep 2
-          #     done
-          #     exec python app.py                              
+          command:
+            # - /bin/sh
+            # - -c
+            # - |
+            #   until [ -f /vault/secrets/db-creds ]; do
+            #     echo "Waiting for Vault secrets..."
+            #     sleep 2
+            #   done
+            #   exec python app.py                              
