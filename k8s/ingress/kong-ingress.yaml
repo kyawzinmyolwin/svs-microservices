@@ -1,0 +1,103 @@
+# ============================================================
+# Kong IngressClass
+# ============================================================
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: kong
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "false"
+spec:
+  controller: ingress-controllers.konghq.com/kong
+
+---
+# ============================================================
+# Kong KongPlugin – Rate Limiting (applied globally via annotation)
+# ============================================================
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: rate-limiting
+  namespace: svs-microservices
+plugin: rate-limiting
+config:
+  minute: 100  # Limit to 100 requests per minute
+  policy: local
+
+---
+# ============================================================
+# Kong KongPlugin – Request Size Limiting
+# ============================================================
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: request-size-limiting
+  namespace: svs-microservices
+plugin: request-size-limiting
+config:
+  allowed_payload_size: 8  # MB
+
+---
+# ============================================================
+# Kong Ingress – SVS Microservices
+# Namespace  : svs-microservices
+# Host       : svs-app.local
+#
+# Route map:
+#   /                → svs-service-frontend  :80
+#   /api/customers   → svs-service-customer  :5002
+#   /api/catalog     → svs-service-catalog   :5001
+#   /api/appointments→ svs-service-appointment:5003
+# ============================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kong-ingress
+  namespace: svs-microservices
+  annotations:
+    # Strip the matched prefix before forwarding to the backend
+    konghq.com/strip-path: "true"
+    # Attach plugins (comma-separated)
+    konghq.com/plugins: rate-limiting, request-size-limiting
+spec:
+  ingressClassName: kong
+  rules:
+  - host: svs-app.local
+    http:
+      paths:
+
+      # ── Frontend (catch-all) ────────────────────────────────
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: svs-service-frontend
+            port:
+              number: 80
+
+      # ── Customer Service ────────────────────────────────────
+      # - path: /api/customers
+      #   pathType: Prefix
+      #   backend:
+      #     service:
+      #       name: svs-service-customer
+      #       port:
+      #         number: 5002
+
+      # ── Catalog Service ─────────────────────────────────────
+      # - path: /api/catalog
+      #   pathType: Prefix
+      #   backend:
+      #     service:
+      #       name: svs-service-catalog
+      #       port:
+      #         number: 5001
+
+      # ── Appointment Service ──────────────────────────────────
+      # - path: /api/appointments
+      #   pathType: Prefix
+      #   backend:
+      #     service:
+      #       name: svs-service-appointment
+      #       port:
+      #         number: 5003
