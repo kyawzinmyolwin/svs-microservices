@@ -3,6 +3,8 @@ from flask import Flask, jsonify, request
 import db_connector
 import re
 from datetime import datetime, date
+import logging
+import json
 
 NAME_REGEX = r"^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$"
 NZ_PHONE_REGEX = r"^02\d{7,9}$"
@@ -207,3 +209,15 @@ def health():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002, debug=True)
+
+###Logging setup (optional, can be configured as needed)
+logging.basicConfig(
+    level=logging.INFO,
+    format=json.dumps({
+        "level": "%(levelname)s",
+        "message": "%(message)s",
+        "service": "customer-service"
+    })
+)
+
+logging.info("Customer service started")
