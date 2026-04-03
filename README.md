@@ -123,14 +123,14 @@ cd ../appointments_service && docker build -t appointment_service .
 Tag and push example:
 
 ```bash
-docker tag frontend_service localhost:5000/frontend_service:latest
-docker push localhost:5000/frontend_service:latest
+docker tag frontend_service 192.168.56.90:5000/frontend_service:latest
+docker push 192.168.56.90:5000/frontend_service:latest
 ```
 
 Verify registry catalog:
 
 ```bash
-curl http://localhost:5000/v2/_catalog
+curl http://192.168.56.90:5000/v2/_catalog
 ```
 
 ## Configure `containerd` for an Insecure Local Registry (Kind Worker)
