@@ -243,3 +243,144 @@ Examples:
 - `fix: resolve environment variable misconfiguration`
 - `docs: add troubleshooting guide`
 - `refactor: split DB access into connector`
+
+## Vault Installation & Initialisation
+
+### Step 1 - Install Vault via Helm
+
+```
+helm repo add hashicorp https://helm.releases.hashicorp.com
+helm repo update
+ 
+kubectl create namespace vault
+ 
+# ── DEV MODE (quick-start / portfolio demo) ──────────────────
+helm install vault hashicorp/vault \
+  --namespace vault \
+  --set server.dev.enabled=true \
+  --set injector.enabled=true
+ 
+# ── PRODUCTION MODE (persistent storage) ────────────────────
+helm install vault hashicorp/vault \
+  --namespace vault \
+  --set server.ha.enabled=false \
+  --set server.dataStorage.enabled=true \
+  --set server.dataStorage.size=10Gi \
+  --set injector.enabled=true
+```
+### STEP 2 — Initialise & Unseal (Production Mode only)
+```
+kubectl exec -n vault -it vault-0 -- vault operator init
+
+# Save the 5 Unseal Keys and Root Token somewhere secure (e.g. 1Password)!
+ 
+# Unseal (run 3 times with different keys)
+kubectl exec -n vault -it vault-0 -- vault operator unseal <Unseal-Key-1>
+kubectl exec -n vault -it vault-0 -- vault operator unseal <Unseal-Key-2>
+kubectl exec -n vault -it vault-0 -- vault operator unseal <Unseal-Key-3>
+ 
+# Verify
+kubectl get pods -n vault   # STATUS should be Running
+```
+### STEP 3 — Login to Vault
+``` 
+kubectl exec -it -n vault vault-0 -- sh
+```
+## Kubernetes Auth Method
+### STEP 4 — Enable & Configure Kubernetes Auth
+```
+vault write auth/kubernetes/config \
+  token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+  kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443" \
+  kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+```
+Verify 
+```
+vault auth list
+```
+## In this repo, I use 3 different ways for database authentication between pod and Database.
+
+- [Dynamic Secrets - MySQL](#DynamicSecrets) - For svs-customer pods
+- [Static Secrets](#architecture) - For svs-appointments pods
+- [ConfigMap & Secrets](#repository-layout) - For svs-catalog pods
+
+## DynamicSecrets — MySQL
+
+STEP 6A — Prepare MySQL Admin User
+Run on your MySQL host (Vagrant host IP: 192.168.56.1):
+```
+mysql -u root -p
+
+-- Create a dedicated Vault admin account (never exposed to apps)
+CREATE USER 'vault_admin'@'%' IDENTIFIED BY 'VaultP@ssw0rd';
+GRANT ALL PRIVILEGES ON *.* TO 'vault_admin'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+ 
+-- Create the application databases
+CREATE DATABASE customers_svs;
+CREATE DATABASE catalog_svs;
+```
+
+
+### STEP 6B — Enable Database Secrets Engine & Configure MySQL
+# Inside vault-0 pod
+```
+vault secrets enable database
+```
+
+# Customers DB connection
+```
+vault write database/config/customers_svs \
+  plugin_name=mysql-database-plugin \
+  connection_url='{{username}}:{{password}}@tcp(192.168.56.1:3306)/' \
+  allowed_roles='svs-customer-role' \
+  username='vault_admin' \
+  password='VaultP@ssw0rd'
+
+#Verify
+vault read database/config/customers_svs
+```
+### STEP 6C — Define MySQL Dynamic Roles
+```
+vault write database/roles/svs-customer-role \
+  db_name=customers_svs \
+  creation_statements="
+    CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';
+    GRANT SELECT, INSERT, UPDATE, DELETE ON customers_svs.* TO '{{name}}'@'%';
+  " \
+  default_ttl="15m" \
+  max_ttl="1h"
+
+```
+```
+# Test credential generation immediately
+vault read database/creds/svs-customer-role
+# Expected: username=v-token-svs-custom-xxxx  password=<random>  lease_duration=15m
+```
+### STEP 6D — Write Vault Policies for Dynamic MySQL
+```
+cat <<EOF > /home/vault/svs-customer-db-policy.hcl
+path "database/creds/svs-customer-role" {
+  capabilities = ["read"]
+}
+EOF
+vault policy write svs-customer-db-policy /home/vault/svs-customer-db-policy.hcl
+```
+## Kubernetes ServiceAccounts & Vault Roles
+```
+kubectl apply -f ~/svs-microservices/k8s/sa/serviceaccounts.yaml
+```
+### STEP 9 — Bind ServiceAccounts to Vault Roles
+Back inside the vault-0 pod shell:
+```
+# Customers — dynamic MySQL
+vault write auth/kubernetes/role/svs-role-customers \
+  bound_service_account_names=svs-app-customers-sa \
+  bound_service_account_namespaces=svs-microservices \
+  policies=svs-customer-db-policy \
+  ttl=1h
+```
+```
+# Verify
+vault read auth/kubernetes/role/svs-role-customers
+```
