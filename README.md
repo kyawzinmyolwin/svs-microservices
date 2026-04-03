@@ -142,13 +142,9 @@ Target registry in this guide: `192.168.56.90:5000`
 ### Option 1: Mirror and TLS override in `config.toml`
 1. Enter the worker container:
    ```bash
-   docker exec -it 127-worker /bin/bash
+   docker exec -it 127-worker3 /bin/bash
    ```
-2. Create certs directory:
-   ```bash
-   mkdir -p /etc/containerd/certs.d/192.168.56.90:5000
-   ```
-3. Append to `/etc/containerd/config.toml`:
+2. Append to `/etc/containerd/config.toml`:
    ```toml
    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."192.168.56.90:5000"]
      endpoint = ["http://192.168.56.90:5000"]
@@ -156,7 +152,7 @@ Target registry in this guide: `192.168.56.90:5000`
    [plugins."io.containerd.grpc.v1.cri".registry.configs."192.168.56.90:5000".tls]
      insecure_skip_verify = true
    ```
-4. Restart containerd:
+3. Restart containerd:
    ```bash
    systemctl restart containerd
    ```
