@@ -1,222 +1,196 @@
 # SVS Microservices
 
-A Flask-based microservices application demonstrating:
-- Service-to-service communication
-- Docker & Docker Compose
-- Database-per-service
-- CI/CD with GitHub Actions
+A production-style reference project that demonstrates how to run a Flask-based microservices system on Kubernetes with independent databases, internal service discovery, and ingress routing.
 
-This project demonstrates service-to-service communication in Kubernetes using
-a Flask-based frontend and backend with a database.
+## Table of Contents
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Repository Layout](#repository-layout)
+- [Core Features](#core-features)
+- [Prerequisites](#prerequisites)
+- [Quick Start (Docker Compose)](#quick-start-docker-compose)
+- [Kubernetes Deployment](#kubernetes-deployment)
+- [Build, Tag, and Push Images to a Local Registry](#build-tag-and-push-images-to-a-local-registry)
+- [Configure `containerd` for an Insecure Local Registry (Kind Worker)](#configure-containerd-for-an-insecure-local-registry-kind-worker)
+- [Kong Ingress Setup](#kong-ingress-setup)
+- [Local Host Mapping](#local-host-mapping)
+- [Troubleshooting](#troubleshooting)
+- [Commit Message Convention](#commit-message-convention)
 
-## 🧱 Architecture
-- Frontend: Flask application
-- Backend: Flask REST API
-- Database: MySQL/PostgreSQL
-- Platform: Kubernetes
+## Overview
+This repository showcases a multi-service application pattern with:
+- A Flask frontend
+- Multiple Flask backend services
+- Database-per-service isolation
+- Kubernetes manifests for deployments, services, ingress, and config
 
-## 🔁 Service Communication Flow
-Frontend → Backend Service → Database Service
+It is intended for local development, Kubernetes learning, and debugging real-world microservice communication flows.
 
-## 🚀 Features
-- Kubernetes Deployments & Services
+## Architecture
+### High-level flow
+`Frontend -> Backend Service(s) -> Database`
+
+### Platform components
+- **Application layer:** Flask services
+- **Data layer:** service-specific databases
+- **Orchestration:** Kubernetes
+- **Ingress/API gateway:** Kong (optional setup)
+
+## Repository Layout
+```text
+.
+├── app-services/
+│   ├── appointments_service/
+│   ├── catalog_service/
+│   ├── customer_service/
+│   ├── frontend_service/
+│   └── db/
+├── k8s/
+│   ├── configmaps/
+│   ├── deployments/
+│   ├── ingress/
+│   ├── logging/
+│   ├── sa/
+│   ├── secrets/
+│   └── services/
+├── kind-setup/
+├── troubleshooting/
+└── docker-compose.yml
+```
+
+## Core Features
+- Kubernetes Deployments and Services
 - Internal DNS-based service discovery
-- REST API communication
-- Real-world troubleshooting scenarios
-- Add Github Runner for local pipeline testing...
-
-## 📦 Kubernetes Resources
-- Deployments
-- ClusterIP Services
-- ConfigMaps
-- Namespaces
-
-## 🛠 How to Deploy
-
-```bash
-kubectl apply -f k8s/namespace.yaml
-kubectl apply -f k8s/
-```
-## Message Styles
-feat: add appointment service CRUD endpoints
-fix: resolve env variable misconfiguration
-docs: add troubleshooting guide
-refactor: split db access into connector
-
-## Kind Cluster Setup
-```bash
-cd svs-microservices/kind-setup/
-./setup-kindcluster127-port-mapping.sh
-```
-## Service Port map to Kind Cluster
-
-# Containerd Registry Configuration Guide
-
-This documentation outlines the steps to configure a custom insecure registry for `containerd` within a Docker worker node. This process ensures that the node can pull images from a private registry located at `192.168.56.90:5000`.
-
----
+- Service-to-service REST communication
+- Namespace-based environment isolation
+- Practical troubleshooting and local-cluster workflows
 
 ## Prerequisites
-* Access to the host machine running Docker.
-* A running container named `127-worker`.
-* Root or sudo privileges within the container.
+Install the following tools before starting:
+- Docker
+- Kubernetes CLI (`kubectl`)
+- Kind (for local Kubernetes cluster)
+- Helm (for Kong installation)
 
-## Docker Build
+## Quick Start (Docker Compose)
+From the repository root:
 
-### Customer Service
-#### svs-microservices/app-services/catalog_service
-```
-docker build -t customer_service .
-
-```
-
-### Frontend Service
-#### svs-microservices/app-services/frontend_service
-```
-docker build -t frontend_service .
-
+```bash
+docker compose up --build
 ```
 
-### Appointment Service
-#### svs-microservices/app-services/appointments_service
+Use this path for quick local development when Kubernetes is not required.
+
+## Kubernetes Deployment
+Apply Kubernetes manifests from the repository root:
+
+```bash
+kubectl apply -f k8s/
 ```
-docker build -t appointment_service .
+
+If needed, create namespace first (or ensure your manifests already include namespace metadata):
+
+```bash
+kubectl create ns svs-microservices
 ```
-#### Run the official Docker Registry Container and map the port.
+
+Apply deployments explicitly:
+
+```bash
+kubectl apply -f k8s/deployments/
 ```
+
+## Build, Tag, and Push Images to a Local Registry
+Start a local registry:
+
+```bash
 docker run -d -p 5000:5000 --restart=always --name local-registry registry:2
 ```
-#### Verify the Local Registry
-```
-curl http://localhost:5000/v2/_catalog
-```
-### Docker Tag
 
+Example build commands:
 
+```bash
+# customer service
+cd app-services/customer_service && docker build -t customer_service .
+
+# frontend service
+cd ../frontend_service && docker build -t frontend_service .
+
+# appointments service
+cd ../appointments_service && docker build -t appointment_service .
 ```
+
+Tag and push example:
+
+```bash
 docker tag frontend_service localhost:5000/frontend_service:latest
-```
-
-
-#### Docker Push to Registry
-```
 docker push localhost:5000/frontend_service:latest
 ```
 
-#### http: server gave HTTP response to HTTPS client
-```
-vi cat /etc/docker/daemon.json
+Verify registry catalog:
 
-Add this block
- {
-	"insecure-registries":["192.168.56.90:5000"],
-	"experimental" : false
-}
-```
-#### Verify image name in Deployment YAML
-
-### Configure Trust Relation to containerd
-#### I tested two different approach for this configuration.
-
-
----
-
-## Step-by-Step Configuration
-
-### 1. Access the Worker Container
-Enter the interactive shell of the worker container to perform administrative tasks.
 ```bash
-docker exec -it 127-worker /bin/bash
+curl http://localhost:5000/v2/_catalog
 ```
 
-### 2. Create the Certificate Directory
-Create a specific directory path for the registry host. This structure is used by `containerd` to discover custom configurations for specific endpoints.
+## Configure `containerd` for an Insecure Local Registry (Kind Worker)
+Target registry in this guide: `192.168.56.90:5000`
+
+> **Warning**
+> This setup uses insecure HTTP/skip-verify and is appropriate only for local development environments.
+
+### Option 1: Mirror and TLS override in `config.toml`
+1. Enter the worker container:
+   ```bash
+   docker exec -it 127-worker /bin/bash
+   ```
+2. Create certs directory:
+   ```bash
+   mkdir -p /etc/containerd/certs.d/192.168.56.90:5000
+   ```
+3. Append to `/etc/containerd/config.toml`:
+   ```toml
+   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."192.168.56.90:5000"]
+     endpoint = ["http://192.168.56.90:5000"]
+
+   [plugins."io.containerd.grpc.v1.cri".registry.configs."192.168.56.90:5000".tls]
+     insecure_skip_verify = true
+   ```
+4. Restart containerd:
+   ```bash
+   systemctl restart containerd
+   ```
+
+### Option 2: Host-level config with `hosts.toml`
+1. Enter worker container:
+   ```bash
+   docker exec -it 127-worker /bin/bash
+   ```
+2. Create `/etc/containerd/certs.d/192.168.56.90:5000/hosts.toml`:
+   ```toml
+   server = "http://192.168.56.90:5000"
+
+   [host."http://192.168.56.90:5000"]
+     capabilities = ["pull", "resolve"]
+     skip_verify = true
+   ```
+3. Ensure `/etc/containerd/config.toml` contains:
+   ```toml
+   [plugins."io.containerd.grpc.v1.cri".registry]
+     config_path = "/etc/containerd/certs.d"
+   ```
+4. Restart containerd:
+   ```bash
+   systemctl restart containerd
+   ```
+
+## Kong Ingress Setup
+Add the Helm chart repository and install Kong:
+
 ```bash
-mkdir -p /etc/containerd/certs.d/192.168.56.90:5000
-```
-
-### 3. Install Text Editor
-Update the package lists and install `vim` to allow for file editing within the container environment.
-```bash
-apt-get update && apt-get install -y vim
-```
-
-### 4. Update Global Containerd Configuration
-Modify the primary `containerd` configuration file to define the registry mirror and TLS settings.
-
-* **File:** `/etc/containerd/config.toml`
-* **Action:** Append the following block to the end of the file:
-
-```toml
-[plugins."io.containerd.grpc.v1.cri".registry.mirrors."192.168.56.90:5000"]
-  endpoint = ["http://192.168.56.90:5000"]
-
-[plugins."io.containerd.grpc.v1.cri".registry.configs."192.168.56.90:5000".tls]
-  insecure_skip_verify = true
-```
-
-### 5. Restart the Service
-Apply the changes by restarting the `containerd` daemon.
-```bash
-systemctl restart containerd
-```
-
----
-
-> **Note:** Since this configuration uses `insecure_skip_verify = true` and `http`, it is intended for **development or internal lab environments**. Ensure proper security measures are in place before using similar configurations in production.
-
-## Option-2
-
-### 1. Access the Worker Container
-Enter the interactive shell of the worker container to perform administrative tasks.
-```bash
-docker exec -it 127-worker /bin/bash
-```
-
-### 1. Configure Host-Specific Discovery
-Create a `hosts.toml` file within the certificate directory created in Step 2. This explicitly defines how `containerd` should interact with this specific server.
-
-* **File:** `/etc/containerd/certs.d/192.168.56.90:5000/host.toml`
-* **Content:**
-```toml
-server = "http://192.168.56.90:5000"
-
-[host."http://192.168.56.90:5000"]
-  capabilities = ["pull", "resolve"]
-  skip_verify = true
-```
-### 2. Update Global Containerd Configuration
-Modify the primary `containerd` configuration file to define the registry mirror and TLS settings.
-
-* **File:** `/etc/containerd/config.toml`
-* **Action:** Append the following block to the end of the file:
-
-```toml
-[plugins."io.containerd.grpc.v1.cri".registry]
-  config_path = "/etc/containerd/certs.d"
-`
-```
-### 3. Restart the Service
-Apply the changes by restarting the `containerd` daemon.
-```bash
-systemctl restart containerd
-```
-
-### Create Namespace
-``` 
-kubectl create ns svs-microservices 
-```
-
-#### Run the Deployment YAML
-``` 
-kubectl apply -f svs-microservices/k8s/deployments/
-```
-### Kong Setup
-```
 helm repo add kong https://charts.konghq.com
 helm repo update
-```
-```
+
 helm install kong kong/kong \
   --namespace kong \
   --create-namespace \
@@ -229,20 +203,47 @@ helm install kong kong/kong \
   --set admin.type=NodePort \
   --set admin.http.nodePort=32081 \
   --set admin.http.enabled=true
-  ``` 
-### Apply Ingress Config
-``` 
-kubectl apply -f ~/svs-microservices/k8s/ingress/kong-ingress.yaml -n svs-microservices
 ```
-### Access your kubernetes app from host machine
-``` 
+
+Apply ingress:
+
+```bash
+kubectl apply -f k8s/ingress/kong-ingress.yaml -n svs-microservices
+```
+
+## Local Host Mapping
+Map your local hostname to the cluster host IP:
+
+```bash
 sudo vi /etc/hosts
 ```
+
+Add:
+
+```text
+192.168.56.90 svs-app.local
 ```
-192.168.56.90   svs-app.local
-```
-#### Accessing from Host Browser
-```
+
+Access:
+
+```text
 http://svs-app.local:8080/
 ```
 
+## Troubleshooting
+See project notes in:
+- `troubleshooting/service-url-issue.md`
+- service-level notes under `app-services/*/`
+
+## Commit Message Convention
+Use Conventional Commit-style prefixes:
+- `feat:` for new features
+- `fix:` for bug fixes
+- `docs:` for documentation updates
+- `refactor:` for code structure changes without behavior changes
+
+Examples:
+- `feat: add appointment service CRUD endpoints`
+- `fix: resolve environment variable misconfiguration`
+- `docs: add troubleshooting guide`
+- `refactor: split DB access into connector`
