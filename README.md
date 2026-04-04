@@ -354,7 +354,9 @@ vault write database/roles/svs-customer-role \
 ```
 ```
 # Test credential generation immediately
+```
 vault read database/creds/svs-customer-role
+```
 # Expected: username=v-token-svs-custom-xxxx  password=<random>  lease_duration=15m
 ```
 ### STEP 6D — Write Vault Policies for Dynamic MySQL
@@ -383,4 +385,39 @@ vault write auth/kubernetes/role/svs-role-customers \
 ```
 # Verify
 vault read auth/kubernetes/role/svs-role-customers
+```
+## Option 2 - Vault Static Secrets (KV)
+
+### Enable Secrets
+```
+vault secrets enable -path=secret kv-v2
+```
+
+### STEP 1 - Vault policy for Static MySQL
+```
+cat <<EOF > /home/vault/svs-catalog-db-policy.hcl
+path "secret/data/svs/catalog-db" {
+  capabilities = ["read"]
+}
+EOF
+vault policy write svs-catalog-db-policy /home/vault/svs-catalog-db-policy.hcl
+```
+### STEP 2 — Store DB Credentials in Vault
+```
+vault kv put secret/svs/catalog-db \
+  username="catalog_user" \
+  password="CatalogP@ss"
+
+```
+Verify:
+```
+vault kv get secret/svs/catalog-db
+```
+### STEP  — Bind ServiceAccount to Vault Role
+```
+vault write auth/kubernetes/role/svs-role-catalog \
+  bound_service_account_names=svs-app-catalog-sa \
+  bound_service_account_namespaces=svs-microservices \
+  policies=svs-catalog-db-policy \
+  ttl=1h
 ```
