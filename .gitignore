@@ -213,3 +213,34 @@ __marimo__/
 appointment-db-secret.yaml
 
 .github/github-runner-custom/
+
+# Local .terraform directory (contains providers and modules)
+.terraform/
+
+# Local state files (these contain secrets and should stay out of Git)
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude plan files (they may contain sensitive data)
+*.tfplan
+
+# Ignore override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Ignore variables files (ONLY if they contain secrets)
+# It is common to keep 'variables.tf' but ignore '.tfvars'
+*.tfvars
+*.tfvars.json
+
+appointment-db-secret.yaml

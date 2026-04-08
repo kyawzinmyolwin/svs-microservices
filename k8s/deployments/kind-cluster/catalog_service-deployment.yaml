@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svs-app-catalog
+  namespace: svs-microservices
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: svs-app-catalog
+  template:
+    metadata:
+      labels:
+        app: svs-app-catalog
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "svs-role-catalog"
+        vault.hashicorp.com/agent-inject-secret-db-creds: "secret/data/svs/db/catalog"
+        vault.hashicorp.com/agent-inject-template-db-creds: |
+          {{- with secret "secret/data/svs/db/catalog" -}}
+          DB_USERNAME={{ .Data.data.username }}
+          DB_PASSWORD={{ .Data.data.password }}
+          {{- end }}        
+    spec:
+      serviceAccountName: svs-app-catalog-sa   
+      containers:
+        - name: svs-app
+          image: 192.168.56.90:5000/catalog_service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5001
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          envFrom:
+            - configMapRef:
+                name: catalog-config
+          #   - secretRef:
+          #       name: catalog-secrets
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 3

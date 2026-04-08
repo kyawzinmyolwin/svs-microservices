@@ -1,0 +1,142 @@
+# Global settings
+namespace: svs-microservices
+environment: development
+
+# Image registry
+registry: 192.168.56.90:5000
+imagePullPolicy: Always
+
+# Database settings
+dbHost: "192.168.56.1"
+
+# Service accounts
+serviceAccounts:
+  customers: svs-app-customers-sa
+  catalog: svs-app-catalog-sa
+  appointments: svs-app-appointments-sa
+
+# Frontend configuration
+frontend:
+  enabled: true
+  replicas: 2
+  image:
+    repository: frontend_service
+    tag: latest
+  service:
+    port: 80
+    targetPort: 5000
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
+  config:
+    customerSvcUrl: "http://svs-service-customer:5002"
+    catalogSvcUrl: "http://svs-service-catalog:5001"
+    appointmentsSvcUrl: "http://svs-service-appointment:5003"
+  secrets:
+    flaskSecretKey: "dev-secret-key"
+
+# Customer service
+customer:
+  enabled: true
+  replicas: 2
+  image:
+    repository: customer_service
+    tag: latest
+  service:
+    port: 5002
+    targetPort: 5002
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
+  config:
+    dbHost: "192.168.56.1"
+  vault:
+    enabled: true
+    role: "svs-role-customers"
+    secretPath: "database/creds/svs-customer-role"
+  secrets:
+    dbUser: "customers_user"
+    dbPass: "CustomersP@ss"
+
+# Catalog service
+catalog:
+  enabled: true
+  replicas: 2
+  image:
+    repository: piconet/svs_microservices-catalog_service
+    tag: "1.0.0"
+  service:
+    port: 5001
+    targetPort: 5001
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
+  config:
+    dbHost: "192.168.56.1"
+  vault:
+    enabled: true
+    role: "svs-role-catalog"
+    secretPath: "secret/data/svs/db/catalog"
+  secrets:
+    dbUser: "catalog_user"
+    dbPass: "CatalogP@ss"
+
+# Appointment service
+appointment:
+  enabled: true
+  replicas: 2
+  image:
+    repository: appointment_service
+    tag: latest
+  service:
+    port: 5003
+    targetPort: 5003
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
+  config:
+    dbHost: "192.168.56.1"
+  secrets:
+    dbUser: "appointments_user"
+    dbPass: "NewSecureP@ss2026"
+
+# Ingress configuration
+ingress:
+  kong:
+    enabled: true
+    className: kong
+    host: svs-app.local
+    plugins:
+      rateLimiting:
+        enabled: true
+        minute: 100
+        policy: local
+      requestSizeLimiting:
+        enabled: true
+        allowedPayloadSize: 8
+    paths:
+      frontend: /
+      customer: /api/customers
+      catalog: /api/catalog
+      appointment: /api/appointments
+  nginx:
+    enabled: false
+    className: nginx
+    host: svs-app.local
+    path: /

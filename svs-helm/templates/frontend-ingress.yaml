@@ -1,0 +1,22 @@
+{{- if .Values.ingress.nginx.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  namespace: {{ .Values.namespace }}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: {{ .Values.ingress.nginx.className }}
+  rules:
+  - host: {{ .Values.ingress.nginx.host }}
+    http:
+      paths:
+      - path: {{ .Values.ingress.nginx.path }}
+        pathType: Prefix
+        backend:
+          service:
+            name: svs-service-frontend
+            port:
+              number: {{ .Values.frontend.service.port }}
+{{- end }}

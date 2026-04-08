@@ -3,7 +3,7 @@
 sudo sysctl fs.inotify.max_user_watches=524288
 sudo sysctl fs.inotify.max_user_instances=512
 
-kind create cluster --config ../kindconfig/kindconfig-v127_port_mapping.yaml
+kind create cluster --config kindconfig-v127_port_mapping.yaml
 sleep 1
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.9/config/manifests/metallb-native.yaml --context kind-127
 pods_checking=false

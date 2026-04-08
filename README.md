@@ -179,6 +179,9 @@ Target registry in this guide: `192.168.56.90:5000`
    ```bash
    systemctl restart containerd
    ```
+### Registry Script for docker local registry
+
+- [configure_registry.sh](#svs-microservices/docker-registry/configure_registry.sh)
 
 ## Kong Ingress Setup
 Add the Helm chart repository and install Kong:

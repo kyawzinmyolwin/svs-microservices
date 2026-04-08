@@ -2,9 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: svs-app-frontend
-  namespace: svs-microservices
+  namespace: {{ .Values.namespace }}
 spec:
-  replicas: 2
+  replicas: {{ .Values.frontend.replicas }}
   selector:
     matchLabels:
       app: svs-app-frontend
@@ -15,17 +15,12 @@ spec:
     spec:
       containers:
         - name: svs-app
-          image: 192.168.56.90:5000/frontend_service:latest #192.168.56.85:5000/frontend-service:8d77ce527a03bba79def888c128963f1c956d7bf #piconet/svs_microservices-frontend_service:1.0.1 #192.168.56.85:5000/frontend #
-          imagePullPolicy: Always
+          image: {{ .Values.registry }}/{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
-            - containerPort: 5000
+            - containerPort: {{ .Values.frontend.service.targetPort }}
           resources:
-            requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "250m"
-              memory: "256Mi"
+            {{- toYaml .Values.frontend.resources | nindent 12 }}
           envFrom:
             - configMapRef:
                 name: frontend-config
@@ -34,14 +29,14 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: 5000
+              port: {{ .Values.frontend.service.targetPort }}
             initialDelaySeconds: 15
             periodSeconds: 20
             failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /health
-              port: 5000
+              port: {{ .Values.frontend.service.targetPort }}
             initialDelaySeconds: 10
             periodSeconds: 15
             failureThreshold: 3

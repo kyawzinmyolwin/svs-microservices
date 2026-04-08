@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svs-app-frontend
+  namespace: svs-microservices
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: svs-app-frontend
+  template:
+    metadata:
+      labels:
+        app: svs-app-frontend
+    spec:
+      containers:
+        - name: svs-app
+          image: 366077889879.dkr.ecr.ap-southeast-1.amazonaws.com/frontend_service:latest #192.168.56.85:5000/frontend-service:8d77ce527a03bba79def888c128963f1c956d7bf #piconet/svs_microservices-frontend_service:1.0.1 #192.168.56.85:5000/frontend #
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          envFrom:
+            - configMapRef:
+                name: frontend-config
+            - secretRef:
+                name: frontend-secrets
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 3

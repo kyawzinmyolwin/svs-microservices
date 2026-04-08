@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svs-app-appointment
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.appointment.replicas }}
+  selector:
+    matchLabels:
+      app: svs-app-appointment
+  template:
+    metadata:
+      labels:
+        app: svs-app-appointment
+    spec:
+      containers:
+        - name: svs-app
+          image: {{ .Values.registry }}/{{ .Values.appointment.image.repository }}:{{ .Values.appointment.image.tag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.appointment.service.targetPort }}
+          resources:
+            {{- toYaml .Values.appointment.resources | nindent 12 }}
+          envFrom:
+            - secretRef:
+                name: appointment-db-secret
+            - configMapRef:
+                name: appointment-config

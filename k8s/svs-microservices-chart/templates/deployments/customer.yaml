@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svs-app-customer
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.customer.replicas }}
+  selector:
+    matchLabels:
+      app: svs-app-customer
+  template:
+    metadata:
+      labels:
+        app: svs-app-customer
+      {{- if and .Values.customer.vault ( .Values.customer.vault.enabled ) }}
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: {{ .Values.customer.vault.role | quote }}
+        vault.hashicorp.com/agent-inject-secret-db-creds: {{ .Values.customer.vault.secretPath | quote }}
+        vault.hashicorp.com/agent-inject-template-db-creds: |
+          {{`{{- with secret "`}}{{ .Values.customer.vault.secretPath }}{{`" -}}`}}
+          DB_USERNAME={{`{{ .Data.username }}`}}
+          DB_PASSWORD={{`{{ .Data.password }}`}}
+          {{`{{- end }}`}}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccounts.customers }}
+      containers:
+        - name: svs-app
+          image: {{ .Values.registry }}/{{ .Values.customer.image.repository }}:{{ .Values.customer.image.tag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.customer.service.targetPort }}
+          resources:
+            {{- toYaml .Values.customer.resources | nindent 12 }}
+          envFrom:
+            {{- if and .Values.customer.vault (not .Values.customer.vault.enabled) }}
+            - secretRef:
+                name: customer-db-secret
+            {{- else if not ( .Values.customer.vault | default dict ).enabled }}
+            - secretRef:
+                name: customer-db-secret
+            {{- end }}
+            - configMapRef:
+                name: customer-config

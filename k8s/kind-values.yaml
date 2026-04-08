@@ -1,0 +1,30 @@
+# minimal-kind-values.yaml - Only override what's needed
+namespace: svs-microservices
+registry: 192.168.56.90:5000
+imagePullPolicy: Always
+dbHost: "192.168.56.1"
+
+# Disable Vault globally by providing default vault config
+customer:
+  vault:
+    enabled: false
+catalog:
+  vault:
+    enabled: false
+appointment:
+  vault:
+    enabled: false
+
+# Override image tags if needed
+customer:
+  image:
+    tag: latest
+catalog:
+  image:
+    tag: latest
+appointment:
+  image:
+    tag: latest
+frontend:
+  image:
+    tag: latest

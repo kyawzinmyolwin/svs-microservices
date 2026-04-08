@@ -1,0 +1,91 @@
+{{- if .Values.ingress.kong.enabled }}
+# Kong IngressClass
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: kong
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "false"
+spec:
+  controller: ingress-controllers.konghq.com/kong
+
+---
+# KongPlugin - Rate Limiting
+{{- if .Values.ingress.kong.plugins.rateLimiting.enabled }}
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: rate-limiting
+  namespace: {{ .Values.namespace }}
+plugin: rate-limiting
+config:
+  minute: {{ .Values.ingress.kong.plugins.rateLimiting.minute }}
+  policy: {{ .Values.ingress.kong.plugins.rateLimiting.policy }}
+{{- end }}
+
+---
+# KongPlugin - Request Size Limiting
+{{- if .Values.ingress.kong.plugins.requestSizeLimiting.enabled }}
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: request-size-limiting
+  namespace: {{ .Values.namespace }}
+plugin: request-size-limiting
+config:
+  allowed_payload_size: {{ .Values.ingress.kong.plugins.requestSizeLimiting.allowedPayloadSize }}
+{{- end }}
+
+---
+# Kong Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kong-ingress
+  namespace: {{ .Values.namespace }}
+  annotations:
+    konghq.com/strip-path: "true"
+    {{- if or .Values.ingress.kong.plugins.rateLimiting.enabled .Values.ingress.kong.plugins.requestSizeLimiting.enabled }}
+    konghq.com/plugins: {{- if .Values.ingress.kong.plugins.rateLimiting.enabled }} rate-limiting{{- end }}{{- if and .Values.ingress.kong.plugins.rateLimiting.enabled .Values.ingress.kong.plugins.requestSizeLimiting.enabled }},{{- end }}{{- if .Values.ingress.kong.plugins.requestSizeLimiting.enabled }} request-size-limiting{{- end }}
+    {{- end }}
+spec:
+  ingressClassName: kong
+  rules:
+  - host: {{ .Values.ingress.kong.host }}
+    http:
+      paths:
+      - path: {{ .Values.ingress.kong.paths.frontend }}
+        pathType: Prefix
+        backend:
+          service:
+            name: svs-service-frontend
+            port:
+              number: {{ .Values.frontend.service.port }}
+      {{- if .Values.customer.enabled }}
+      - path: {{ .Values.ingress.kong.paths.customer }}
+        pathType: Prefix
+        backend:
+          service:
+            name: svs-service-customer
+            port:
+              number: {{ .Values.customer.service.port }}
+      {{- end }}
+      {{- if .Values.catalog.enabled }}
+      - path: {{ .Values.ingress.kong.paths.catalog }}
+        pathType: Prefix
+        backend:
+          service:
+            name: svs-service-catalog
+            port:
+              number: {{ .Values.catalog.service.port }}
+      {{- end }}
+      {{- if .Values.appointment.enabled }}
+      - path: {{ .Values.ingress.kong.paths.appointment }}
+        pathType: Prefix
+        backend:
+          service:
+            name: svs-service-appointment
+            port:
+              number: {{ .Values.appointment.service.port }}
+      {{- end }}
+{{- end }}

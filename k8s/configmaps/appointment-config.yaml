@@ -4,5 +4,6 @@ metadata:
   name: appointment-config
   namespace: svs-microservices
 data:
-  APPOINTMENT_DB_HOST: "192.168.56.1"
+  APPOINTMENT_DB_HOST: "homelab-mysql.cbis0mcwq0kf.ap-southeast-1.rds.amazonaws.com"
+  # APPOINTMENT_DB_HOST: "192.168.56.1"
   # FLASK_SECRET_KEY: "dev-secret-key"

@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svs-app-customer
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.customer.replicas }}
+  selector:
+    matchLabels:
+      app: svs-app-customer
+  template:
+    metadata:
+      labels:
+        app: svs-app-customer
+      {{- if ((.Values.customer.vault).enabled) }}
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: {{ .Values.customer.vault.role | quote }}
+        vault.hashicorp.com/agent-inject-secret-db-creds: {{ .Values.customer.vault.secretPath | quote }}
+        vault.hashicorp.com/agent-inject-template-db-creds: |
+          {{`{{- with secret "`}}{{ .Values.customer.vault.secretPath }}{{`" -}}`}}
+          DB_USERNAME={{`{{ .Data.username }}`}}
+          DB_PASSWORD={{`{{ .Data.password }}`}}
+          {{`{{- end }}`}}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccounts.customers }}
+      containers:
+        - name: svs-app
+          image: {{ .Values.registry }}/{{ .Values.customer.image.repository }}:{{ .Values.customer.image.tag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.customer.service.targetPort }}
+          resources:
+            {{- toYaml .Values.customer.resources | nindent 12 }}
+          envFrom:
+            {{- /* FIX: single clean condition - inject K8s secret only when Vault is disabled */}}
+            {{- if not ((.Values.customer.vault).enabled) }}
+            - secretRef:
+                name: customer-db-secret
+            {{- end }}
+            - configMapRef:
+                name: customer-config
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.customer.service.targetPort }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.customer.service.targetPort }}
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 3

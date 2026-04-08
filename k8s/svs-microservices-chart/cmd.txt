@@ -1,0 +1,4 @@
+helm install svs-microservices ./svs-microservices-chart \
+  --namespace svs-microservices \
+  --create-namespace \
+  --values kind-values.yaml
