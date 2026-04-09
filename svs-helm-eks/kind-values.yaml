@@ -1,0 +1,29 @@
+# kind-values.yaml - Kind cluster overrides
+namespace: svs-microservices
+registry: ${ECR_URL}
+imagePullPolicy: Always
+dbHost: "${DB_HOST}"
+
+# FIX: merged vault + image settings into single key per service
+# (YAML does not allow duplicate keys - second key silently overwrites first)
+customer:
+  vault:
+    enabled: true
+  image:
+    tag: latest
+
+catalog:
+  vault:
+    enabled: true
+  image:
+    tag: latest
+
+appointment:
+  vault:
+    enabled: false
+  image:
+    tag: latest
+
+frontend:
+  image:
+    tag: latest

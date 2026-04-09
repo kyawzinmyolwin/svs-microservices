@@ -1,7 +1,8 @@
 CREATE DATABASE appointments_svs;
-CREATE USER 'appointments_user'@'%' IDENTIFIED BY 'AppointmentsP@ss';
+CREATE USER 'appointments_user'@'%' IDENTIFIED BY 'NewSecureP@ss2026';
 GRANT ALL PRIVILEGES ON appointments_svs.* TO 'appointments_user'@'%';
 FLUSH PRIVILEGES;
+
 
 USE appointments_svs;
 

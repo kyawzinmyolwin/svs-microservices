@@ -1,0 +1,63 @@
+{{- if .Values.frontend.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svs-service-frontend
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: svs-app-frontend
+  ports:
+    - port: {{ .Values.frontend.service.port }}
+      targetPort: {{ .Values.frontend.service.targetPort }}
+  type: ClusterIP
+{{- end }}
+
+{{- if .Values.customer.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svs-service-customer
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: svs-app-customer
+  ports:
+    - port: {{ .Values.customer.service.port }}
+      targetPort: {{ .Values.customer.service.targetPort }}
+  type: ClusterIP
+{{- end }}
+
+{{- if .Values.catalog.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svs-service-catalog
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: svs-app-catalog
+  ports:
+    - port: {{ .Values.catalog.service.port }}
+      targetPort: {{ .Values.catalog.service.targetPort }}
+  type: ClusterIP
+{{- end }}
+
+{{- if .Values.appointment.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svs-service-appointment
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: svs-app-appointment
+  ports:
+    - port: {{ .Values.appointment.service.port }}
+      targetPort: {{ .Values.appointment.service.targetPort }}
+  type: ClusterIP
+{{- end }}

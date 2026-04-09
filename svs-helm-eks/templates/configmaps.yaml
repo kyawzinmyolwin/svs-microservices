@@ -1,0 +1,45 @@
+{{- if .Values.frontend.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: {{ .Values.namespace }}
+data:
+  CUSTOMER_SVC_URL: {{ .Values.frontend.config.customerSvcUrl | quote }}
+  CATALOG_SVC_URL: {{ .Values.frontend.config.catalogSvcUrl | quote }}
+  APPOINTMENTS_SVC_URL: {{ .Values.frontend.config.appointmentsSvcUrl | quote }}
+{{- end }}
+
+{{- if .Values.customer.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: customer-config
+  namespace: {{ .Values.namespace }}
+data:
+  CUSTOMER_DB_HOST: {{ .Values.customer.config.dbHost | quote }}
+{{- end }}
+
+{{- if .Values.catalog.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: catalog-config
+  namespace: {{ .Values.namespace }}
+data:
+  CATALOG_DB_HOST: {{ .Values.catalog.config.dbHost | quote }}
+{{- end }}
+
+{{- if .Values.appointment.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: appointment-config
+  namespace: {{ .Values.namespace }}
+data:
+  APPOINTMENT_DB_HOST: {{ .Values.appointment.config.dbHost | quote }}
+{{- end }}

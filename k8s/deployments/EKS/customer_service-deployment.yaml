@@ -35,7 +35,7 @@ spec:
       serviceAccountName: svs-app-customers-sa
       containers:
         - name: svs-app
-          image: 192.168.56.90:5000/customer_service:latest
+          image: 366077889879.dkr.ecr.ap-southeast-1.amazonaws.com/customer_service:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 5002
