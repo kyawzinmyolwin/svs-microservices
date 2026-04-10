@@ -71,7 +71,7 @@ catalog:
   enabled: true
   replicas: 2
   image:
-    repository: 192.168.56.90:5000/catalog_service
+    repository: catalog_service
     tag: latest
   service:
     port: 5001

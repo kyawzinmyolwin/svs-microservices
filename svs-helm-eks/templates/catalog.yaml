@@ -27,7 +27,7 @@ spec:
       serviceAccountName: {{ .Values.serviceAccounts.catalog }}
       containers:
         - name: svs-app
-          image: {{ .Values.catalog.image.repository }}:{{ .Values.catalog.image.tag }}
+          image: {{ .Values.registry }}/{{ .Values.catalog.image.repository }}:{{ .Values.catalog.image.tag }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: {{ .Values.catalog.service.targetPort }}
