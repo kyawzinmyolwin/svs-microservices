@@ -10,5 +10,5 @@ output "registry_id" {
 
 output "registry_url" {
   description = "Base ECR registry URL — use for docker login command"
-  value       = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com"
+  value       = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.id}.amazonaws.com"
 }
