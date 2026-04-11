@@ -52,6 +52,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ap-southeast-1
+          role-to-assume: arn:aws:iam::366077889879:role/github-action-role
+
       - name: Build & push ${{ matrix.name }}
         if: matrix.enabled == 'true'
         run: |
