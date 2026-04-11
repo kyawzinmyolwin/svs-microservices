@@ -7,7 +7,7 @@ on:
 
 env:
   AWS_REGION: ap-southeast-1
-  ECR_REGISTRY: public.ecr.aws/q9t0q9c2
+  ECR_REGISTRY: public.ecr.aws/abcdefg7
 
 jobs:
   detect-changes:
@@ -104,17 +104,7 @@ jobs:
                     fi
                     
                     echo "flags=$FLAGS" >> $GITHUB_OUTPUT
-      # Helm upgrade handles all services at once — no per-service kubectl apply needed.
-      # SHA-tagged images were pushed as :latest above so the values.yaml
-      # (tag: latest + imagePullPolicy: Always) will pull the new build.
-      - name: Helm upgrade
-        run: |
-          helm upgrade --install svs ./svs-helm \
-            --namespace svs-microservices \
-            --values svs-helm/values.yaml \
-            ${{ steps.helm-flags.outputs.flags }} \
-            --atomic \
-            --timeout 5m
+
 
       - name: Update Kubernetes YAML
         if: matrix.enabled == 'true'
@@ -130,6 +120,3 @@ jobs:
         if: matrix.enabled == 'true'
         run: |
           kubectl apply -f k8s/deployments/kind-cluster/${{ matrix.name }}-deployment.yaml
-
-
-
