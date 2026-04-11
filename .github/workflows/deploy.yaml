@@ -7,7 +7,7 @@ on:
 
 env:
   AWS_REGION: ap-southeast-1
-  ECR_REGISTRY: public.ecr.aws
+  ECR_REGISTRY: public.ecr.aws/q9t0q9c2
 
 jobs:
   detect-changes:
@@ -64,7 +64,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ap-southeast-1
-          role-to-assume: arn:aws:iam::366077889879:role/github-action-role
+          role-to-assume: arn:aws:iam::366077889879:role/github-runner-role
 
       - name: Build & push ${{ matrix.name }}
         if: matrix.enabled == 'true'
@@ -72,21 +72,21 @@ jobs:
           echo "Building ${{ matrix.name }}"
 
           docker build \
-            -t public.ecr.aws/${{ matrix.name }}:${{ github.sha }} \
+            -t public.ecr.aws/q9t0q9c2/${{ matrix.name }}:${{ github.sha }} \
             -f ${{ matrix.path }}/Dockerfile \
             ${{ matrix.path }}
 
           # Login to public ECR
-          aws ecr-public get-login-password --region us-east-1 > /tmp/ecr-token.txt
-          cat /tmp/ecr-token.txt | docker login --username AWS --password-stdin public.ecr.aws
+          aws ecr-public get-login-password --region ap-southeast-1 > /tmp/ecr-token.txt
+          cat /tmp/ecr-token.txt | docker login --username AWS --password-stdin public.ecr.aws/q9t0q9c2
 
-          docker push public.ecr.aws/${{ matrix.name }}:${{ github.sha }}
+          docker push public.ecr.aws/q9t0q9c2/${{ matrix.name }}:${{ github.sha }}
 
       - name: Update Kubernetes YAML
         if: matrix.enabled == 'true'
         run: |
-          DEPLOY_FILE="k8s/deployments/${{ matrix.name }}-deployment.yaml"
-          IMAGE_TAG="public.ecr.aws/${{ matrix.name }}:${{ github.sha }}"
+          DEPLOY_FILE="k8s/deployments/kind-cluster/${{ matrix.name }}-deployment.yaml"
+          IMAGE_TAG="public.ecr.aws/q9t0q9c2/${{ matrix.name }}:${{ github.sha }}"
 
           # Update the image in the specific service deployment file
           sed -i "s|image:.*|image: $IMAGE_TAG|g" $DEPLOY_FILE
@@ -94,4 +94,4 @@ jobs:
       - name: Deploy to Cluster
         if: matrix.enabled == 'true'
         run: |
-          kubectl apply -f k8s/deployments/${{ matrix.name }}-deployment.yaml
+          kubectl apply -f k8s/deployments/kind-cluster/${{ matrix.name }}-deployment.yaml
