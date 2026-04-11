@@ -3,7 +3,7 @@ namespace: svs-microservices
 environment: development
 
 # Image registry
-registry: 192.168.56.90:5000
+registry: public.ecr.aws/q9t0q9c2 #For Local Registry Use: 192.168.56.90:5000
 imagePullPolicy: Always
 
 # Database settings
@@ -71,7 +71,7 @@ catalog:
   enabled: true
   replicas: 2
   image:
-    repository: 192.168.56.90:5000/catalog_service
+    repository: catalog_service
     tag: latest
   service:
     port: 5001
@@ -88,7 +88,7 @@ catalog:
   vault:
     enabled: true
     role: "svs-role-catalog"
-    secretPath: "secret/data/svs/db/catalog"
+    secretPath: "svs-secrets/svs/data/db/catalog"
   secrets:
     dbUser: "catalog_user"
     dbPass: "CatalogP@ss"
@@ -98,7 +98,7 @@ appointment:
   enabled: true
   replicas: 2
   image:
-    repository: appointment_service
+    repository: appointments_service
     tag: latest
   service:
     port: 5003

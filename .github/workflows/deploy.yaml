@@ -5,6 +5,10 @@ on:
     branches: [ main ]
   pull_request:
 
+env:
+  AWS_REGION: ap-southeast-1
+  ECR_REGISTRY: public.ecr.aws/q9t0q9c2
+
 jobs:
   detect-changes:
     runs-on: self-hosted
@@ -68,21 +72,56 @@ jobs:
           echo "Building ${{ matrix.name }}"
 
           docker build \
-            -t public.ecr.aws/q9t0q9c2/${{ matrix.name }}:${{ github.sha }} \
+            -t ${{ env.ECR_REGISTRY }}/${{ matrix.name }}:${{ github.sha }} \
             -f ${{ matrix.path }}/Dockerfile \
             ${{ matrix.path }}
 
           # Login to public ECR
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
 
-          docker push public.ecr.aws/q9t0q9c2/${{ matrix.name }}:${{ github.sha }}
+          docker push ${{ env.ECR_REGISTRY }}/${{ matrix.name }}:${{ github.sha }}
+
+
+          - name: Build Helm set flags
+                  id: helm-flags
+                  run: |
+                    FLAGS=""
+                    
+                    if [ "${{ needs.detect-changes.outputs.customer }}" == "true" ]; then
+                      FLAGS="$FLAGS --set customer.image.tag=${{ github.sha }}"
+                    fi
+                    
+                    if [ "${{ needs.detect-changes.outputs.catalog }}" == "true" ]; then
+                      FLAGS="$FLAGS --set catalog.image.tag=${{ github.sha }}"
+                    fi
+                    
+                    if [ "${{ needs.detect-changes.outputs.appointment }}" == "true" ]; then
+                      FLAGS="$FLAGS --set appointment.image.tag=${{ github.sha }}"
+                    fi
+                    
+                    if [ "${{ needs.detect-changes.outputs.frontend }}" == "true" ]; then
+                      FLAGS="$FLAGS --set frontend.image.tag=${{ github.sha }}"
+                    fi
+                    
+                    echo "flags=$FLAGS" >> $GITHUB_OUTPUT
+      # Helm upgrade handles all services at once — no per-service kubectl apply needed.
+      # SHA-tagged images were pushed as :latest above so the values.yaml
+      # (tag: latest + imagePullPolicy: Always) will pull the new build.
+      - name: Helm upgrade
+        run: |
+          helm upgrade --install svs ./svs-helm \
+            --namespace svs-microservices \
+            --values svs-helm/values.yaml \
+            ${{ steps.helm-flags.outputs.flags }} \
+            --atomic \
+            --timeout 5m
 
       - name: Update Kubernetes YAML
         if: matrix.enabled == 'true'
         # We go back to root context (no working-directory) to find the k8s folder
         run: |
           DEPLOY_FILE="k8s/deployments/kind-cluster/${{ matrix.name }}-deployment.yaml"
-          IMAGE_TAG="public.ecr.aws/q9t0q9c2/${{ matrix.name }}:${{ github.sha }}"
+          IMAGE_TAG="${{ env.ECR_REGISTRY }}/${{ matrix.name }}:${{ github.sha }}"
 
           # Update the image in the specific service deployment file
           sed -i "s|image:.*|image: $IMAGE_TAG|g" $DEPLOY_FILE
@@ -91,3 +130,6 @@ jobs:
         if: matrix.enabled == 'true'
         run: |
           kubectl apply -f k8s/deployments/kind-cluster/${{ matrix.name }}-deployment.yaml
+
+
+

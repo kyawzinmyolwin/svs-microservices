@@ -1,6 +1,6 @@
 # kind-values.yaml - Kind cluster overrides
 namespace: svs-microservices
-registry: 192.168.56.90:5000
+registry: public.ecr.aws/q9t0q9c2 #For Local Registry Use: 192.168.56.90:5000
 imagePullPolicy: Always
 dbHost: "192.168.56.1"
 

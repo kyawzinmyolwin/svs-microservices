@@ -9,7 +9,7 @@ variable "services" {
   default = [
     "customer_service",
     "catalog_service",
-    "appointment_service",
+    "appointments_service",
     "frontend_service"
   ]
 }

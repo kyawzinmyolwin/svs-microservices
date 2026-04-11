@@ -260,6 +260,7 @@ kubectl create namespace vault
 # ── DEV MODE (quick-start / portfolio demo) ──────────────────
 helm install vault hashicorp/vault \
   --namespace vault \
+  --create-namespace \
   --set server.dev.enabled=true \
   --set injector.enabled=true
  
