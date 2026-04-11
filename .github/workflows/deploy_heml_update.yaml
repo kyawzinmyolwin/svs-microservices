@@ -1,0 +1,143 @@
+name: Build & Deploy Services
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+env:
+  AWS_REGION: ap-southeast-1
+  ECR_REGISTRY: public.ecr.aws/abcdefg7
+
+jobs:
+  detect-changes:
+    runs-on: self-hosted
+    outputs:
+      frontend:    ${{ steps.filter.outputs.frontend }}
+      catalog:     ${{ steps.filter.outputs.catalog }}
+      appointment: ${{ steps.filter.outputs.appointment }}
+      customer:    ${{ steps.filter.outputs.customer }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect changed services
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - app-services/frontend_service/**
+            catalog:
+              - app-services/catalog_service/**
+            appointment:
+              - app-services/appointments_service/**
+            customer:
+              - app-services/customer_service/**
+
+  build-and-push:
+    needs: detect-changes
+    runs-on: self-hosted
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      matrix:
+        include:
+          - name: frontend_service
+            path: app-services/frontend_service
+            enabled: ${{ needs.detect-changes.outputs.frontend }}
+
+          - name: catalog_service
+            path: app-services/catalog_service
+            enabled: ${{ needs.detect-changes.outputs.catalog }}
+
+          # folder is appointments_service, but helm key is appointment
+          - name: appointment_service
+            path: app-services/appointments_service
+            enabled: ${{ needs.detect-changes.outputs.appointment }}
+
+          - name: customer_service
+            path: app-services/customer_service
+            enabled: ${{ needs.detect-changes.outputs.customer }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        if: matrix.enabled == 'true'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::366077889879:role/github-action-role
+
+      # Login must happen before docker build so the daemon
+      # can resolve the registry during tagging
+      - name: Login to ECR
+        if: matrix.enabled == 'true'
+        run: |
+          aws ecr-public get-login-password --region us-east-1 \
+            | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+
+      - name: Build & push ${{ matrix.name }}
+        if: matrix.enabled == 'true'
+        run: |
+          IMAGE="${{ env.ECR_REGISTRY }}/${{ matrix.name }}:${{ github.sha }}"
+
+          docker build \
+            -t "$IMAGE" \
+            -f ${{ matrix.path }}/Dockerfile \
+            ${{ matrix.path }}
+
+          docker push "$IMAGE"
+
+  deploy:
+    needs: [detect-changes, build-and-push]
+    runs-on: self-hosted
+    # Only deploy on pushes to main, not on PRs
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::366077889879:role/github-action-role
+
+      # Build --set flags only for services that changed
+      # Unchanged services keep whatever tag is already running in the cluster
+      - name: Build Helm set flags
+        id: helm-flags
+        run: |
+          FLAGS=""
+
+          if [ "${{ needs.detect-changes.outputs.customer }}" == "true" ]; then
+            FLAGS="$FLAGS --set customer.image.tag=${{ github.sha }}"
+          fi
+
+          if [ "${{ needs.detect-changes.outputs.catalog }}" == "true" ]; then
+            FLAGS="$FLAGS --set catalog.image.tag=${{ github.sha }}"
+          fi
+
+          if [ "${{ needs.detect-changes.outputs.appointment }}" == "true" ]; then
+            FLAGS="$FLAGS --set appointment.image.tag=${{ github.sha }}"
+          fi
+
+          if [ "${{ needs.detect-changes.outputs.frontend }}" == "true" ]; then
+            FLAGS="$FLAGS --set frontend.image.tag=${{ github.sha }}"
+          fi
+
+          echo "flags=$FLAGS" >> $GITHUB_OUTPUT
+
+      - name: Helm upgrade
+        run: |
+          helm upgrade --install svs ./svs-helm-eks \
+            --namespace svs-microservices \
+            --create-namespace \
+            --values svs-helm-eks/values.yaml \
+            ${{ steps.helm-flags.outputs.flags }} \
+            --atomic \
+            --timeout 5m
