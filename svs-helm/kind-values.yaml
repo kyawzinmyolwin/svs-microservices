@@ -10,20 +10,20 @@ customer:
   vault:
     enabled: true
   image:
-    tag: latest
+    tag: " "
 
 catalog:
   vault:
     enabled: true
   image:
-    tag: latest
+    tag: " "
 
 appointment:
   vault:
     enabled: false
   image:
-    tag: latest
+    tag: " "
 
 frontend:
   image:
-    tag: latest
+    tag: " "

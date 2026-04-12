@@ -77,8 +77,9 @@ jobs:
             ${{ matrix.path }}
 
           # Login to public ECR
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-          
+          aws ecr-public get-login-password --region ap-southeast-1 > /tmp/ecr-token.txt
+          cat /tmp/ecr-token.txt | docker login --username AWS --password-stdin public.ecr.aws/q9t0q9c2
+
           docker push public.ecr.aws/q9t0q9c2/${{ matrix.name }}:${{ github.sha }}
 
       - name: Update Kubernetes YAML

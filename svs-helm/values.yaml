@@ -21,7 +21,7 @@ frontend:
   replicas: 2
   image:
     repository: frontend_service
-    tag: latest
+    tag: " "
   service:
     port: 80
     targetPort: 5000
@@ -45,7 +45,7 @@ customer:
   replicas: 2
   image:
     repository: customer_service
-    tag: latest
+    tag: " "
   service:
     port: 5002
     targetPort: 5002
@@ -72,7 +72,7 @@ catalog:
   replicas: 2
   image:
     repository: catalog_service
-    tag: latest
+    tag: " "
   service:
     port: 5001
     targetPort: 5001
@@ -99,7 +99,7 @@ appointment:
   replicas: 2
   image:
     repository: appointments_service
-    tag: latest
+    tag: " "
   service:
     port: 5003
     targetPort: 5003
