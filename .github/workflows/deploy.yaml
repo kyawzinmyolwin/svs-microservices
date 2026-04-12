@@ -5,10 +5,6 @@ on:
     branches: [ main ]
   pull_request:
 
-env:
-  AWS_REGION: ap-southeast-1
-  ECR_REGISTRY: public.ecr.aws/q9t0q9c2
-
 jobs:
   detect-changes:
     runs-on: self-hosted
@@ -64,7 +60,12 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ap-southeast-1
-          role-to-assume: arn:aws:iam::366077889879:role/github-runner-role
+          role-to-assume: arn:aws:iam::366077889879:role/github-action-role
+
+      - name: Install Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          helm version
 
       - name: Build & push ${{ matrix.name }}
         if: matrix.enabled == 'true'
@@ -72,14 +73,15 @@ jobs:
           echo "Building ${{ matrix.name }}"
 
           docker build \
-            -t public.ecr.aws/q9t0q9c2/${{ matrix.name }}:${{ github.sha }} \
+            -t public.ecr.aws/${{ matrix.name }}:${{ github.sha }} \
             -f ${{ matrix.path }}/Dockerfile \
             ${{ matrix.path }}
 
           # Login to public ECR
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-          
-          docker push public.ecr.aws/q9t0q9c2/${{ matrix.name }}:${{ github.sha }}
+          aws ecr-public get-login-password --region us-east-1 > /tmp/ecr-token.txt
+          cat /tmp/ecr-token.txt | docker login --username AWS --password-stdin public.ecr.aws
+
+          docker push public.ecr.aws/${{ matrix.name }}:${{ github.sha }}
 
       - name: Deploy with Helm
         if: matrix.enabled == 'true'
