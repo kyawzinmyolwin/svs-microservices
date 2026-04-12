@@ -86,15 +86,15 @@ jobs:
 
           docker push ${{ env.ECR_REGISTRY }}/${{ matrix.name }}:${{ github.sha }}
 
-      - name: Deploy with Helm
-        if: matrix.enabled == 'true'
-        run: |
-          helm upgrade --install svs ./svs-helm \
-            -n svs-microservices \
-            --create-namespace \
-            -f svs-helm/values.yaml \
-            -f svs-helm/kind-values.yaml \
-            --set ${{ matrix.name }}.image.tag=${{ github.sha }}
+      # - name: Deploy with Helm
+      #   if: matrix.enabled == 'true'
+      #   run: |
+      #     helm upgrade --install svs ./svs-helm \
+      #       -n svs-microservices \
+      #       --create-namespace \
+      #       -f svs-helm/values.yaml \
+      #       -f svs-helm/kind-values.yaml \
+      #       --set ${{ matrix.name }}.image.tag=${{ github.sha }}
 
       - name: Update Kubernetes YAML
         if: matrix.enabled == 'true'
