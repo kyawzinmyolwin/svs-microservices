@@ -6,7 +6,7 @@ on:
   pull_request:
 env:
   AWS_REGION: ap-southeast-1
-  ECR_REGISTRY: public.ecr.aws/abcdefg7
+  ECR_REGISTRY: public.ecr.aws/q9t0q9c2
 
 jobs:
   detect-changes:
