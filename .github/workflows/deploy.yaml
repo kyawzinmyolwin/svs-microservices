@@ -81,16 +81,12 @@ jobs:
           
           docker push public.ecr.aws/q9t0q9c2/${{ matrix.name }}:${{ github.sha }}
 
-      - name: Update Kubernetes YAML
+      - name: Deploy with Helm
         if: matrix.enabled == 'true'
         run: |
-          DEPLOY_FILE="k8s/deployments/kind-cluster/${{ matrix.name }}-deployment.yaml"
-          IMAGE_TAG="public.ecr.aws/q9t0q9c2/${{ matrix.name }}:${{ github.sha }}"
-
-          # Update the image in the specific service deployment file
-          sed -i "s|image:.*|image: $IMAGE_TAG|g" $DEPLOY_FILE
-
-      - name: Deploy to Cluster
-        if: matrix.enabled == 'true'
-        run: |
-          kubectl apply -f k8s/deployments/kind-cluster/${{ matrix.name }}-deployment.yaml
+          helm upgrade --install svs ./svs-helm \
+            -n svs-microservices \
+            --create-namespace \
+            -f svs-helm/values.yaml \
+            -f svs-helm/kind-values.yaml \
+            --set ${{ matrix.name }}.image.tag=${{ github.sha }}
