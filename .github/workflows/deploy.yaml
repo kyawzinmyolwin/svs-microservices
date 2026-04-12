@@ -95,3 +95,19 @@ jobs:
             -f svs-helm/values.yaml \
             -f svs-helm/kind-values.yaml \
             --set ${{ matrix.name }}.image.tag=${{ github.sha }}
+
+      - name: Update Kubernetes YAML
+        if: matrix.enabled == 'true'
+        # We go back to root context (no working-directory) to find the k8s folder
+        run: |
+          DEPLOY_FILE="k8s/deployments/kind-cluster/${{ matrix.name }}-deployment.yaml"
+          IMAGE_TAG="${{ env.ECR_REGISTRY }}/${{ matrix.name }}:${{ github.sha }}"
+
+          # Update the image in the specific service deployment file
+          sed -i "s|image:.*|image: $IMAGE_TAG|g" $DEPLOY_FILE
+
+      - name: Deploy to Cluster
+        if: matrix.enabled == 'true'
+        run: |
+          kubectl apply -f k8s/deployments/kind-cluster/${{ matrix.name }}-deployment.yaml
+
