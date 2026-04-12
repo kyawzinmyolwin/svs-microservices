@@ -89,4 +89,4 @@ if __name__ == "__main__":
 ########################################################
 # 11-Apr-2026 : Github Actions Runner Testing for ECR add OIDC Role ARN
 # 11-Apr-2026 : Github Actions Runner Testing with Image Tagging..123
-# 12-Apr-2026 : Fixed OIDC Issues and deployment to K8S with GitHub Actions Runner. OK!
+# 12-Apr-2026 : Fixed OIDC Issues and deployment to K8S with GitHub Actions Runner. OK!#Initiate the Runner

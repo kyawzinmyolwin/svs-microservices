@@ -10,20 +10,20 @@ customer:
   vault:
     enabled: true
   image:
-    tag: " "
+    tag: ${{ github.sha }}
 
 catalog:
   vault:
     enabled: true
   image:
-    tag: " "
+    tag: ${{ github.sha }}
 
 appointment:
   vault:
     enabled: false
   image:
-    tag: " "
+    tag: ${{ github.sha }}
 
 frontend:
   image:
-    tag: " "
+    tag: ${{ github.sha }}
