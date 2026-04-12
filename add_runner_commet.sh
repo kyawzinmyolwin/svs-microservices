@@ -8,7 +8,7 @@ FILES=(
 "app-services/frontend_service/app.py"
 )
 
-COMMENT="#Initiate the Runner1.1"
+COMMENT="#Initiate the Runner1.2"
 
 for FILE in "${FILES[@]}"; do
   if [ -f "$FILE" ]; then

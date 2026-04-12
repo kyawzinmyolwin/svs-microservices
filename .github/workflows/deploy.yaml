@@ -4,6 +4,9 @@ on:
   push:
     branches: [ main ]
   pull_request:
+env:
+  AWS_REGION: ap-southeast-1
+  ECR_REGISTRY: public.ecr.aws/abcdefg7
 
 jobs:
   detect-changes:
@@ -73,15 +76,15 @@ jobs:
           echo "Building ${{ matrix.name }}"
 
           docker build \
-            -t public.ecr.aws/${{ matrix.name }}:${{ github.sha }} \
+            -t ${{ env.ECR_REGISTRY }}/${{ matrix.name }}:${{ github.sha }} \
             -f ${{ matrix.path }}/Dockerfile \
             ${{ matrix.path }}
 
           # Login to public ECR
           aws ecr-public get-login-password --region us-east-1 > /tmp/ecr-token.txt
-          cat /tmp/ecr-token.txt | docker login --username AWS --password-stdin public.ecr.aws
+          cat /tmp/ecr-token.txt | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
 
-          docker push public.ecr.aws/${{ matrix.name }}:${{ github.sha }}
+          docker push ${{ env.ECR_REGISTRY }}/${{ matrix.name }}:${{ github.sha }}
 
       - name: Deploy with Helm
         if: matrix.enabled == 'true'
