@@ -8,7 +8,7 @@ FILES=(
 "app-services/frontend_service/app.py"
 )
 
-COMMENT="#Initiate the Runner1.5"
+COMMENT="#Initiate the Runner for EKS Deployment"
 
 for FILE in "${FILES[@]}"; do
   if [ -f "$FILE" ]; then
