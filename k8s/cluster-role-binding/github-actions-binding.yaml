@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: github-actions-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin         # or a custom role scoped to svs-microservices namespace only
+subjects:
+- kind: Group
+  name: github-actions-group
+  apiGroup: rbac.authorization.k8s.io
