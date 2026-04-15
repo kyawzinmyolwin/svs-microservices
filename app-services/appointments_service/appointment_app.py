@@ -101,3 +101,4 @@ if __name__ == "__main__":
 #Initiate the Runner for ECR IAM Tightening.
 #Initiate the Runner for Assume Role Secrets.
 #Initiate the Runner for Assume Role Secrets success.
+#Initiate the Runner for TF Assume Role Testing.

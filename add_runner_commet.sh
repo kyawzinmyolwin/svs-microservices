@@ -8,7 +8,7 @@ FILES=(
 "app-services/frontend_service/app.py"
 )
 
-COMMENT="#Initiate the Runner for Assume Role Secrets success."
+COMMENT="#Initiate the Runner for TF Assume Role Testing."
 
 for FILE in "${FILES[@]}"; do
   if [ -f "$FILE" ]; then
