@@ -237,3 +237,4 @@ logging.info("Customer service started")
 #Initiate the Runner for Assume Role Secrets.
 #Initiate the Runner for Assume Role Secrets success.
 #Initiate the Runner for TF Assume Role Testing.
+#Initiate the Runner for TF Assume Role Testing. Images not pushed to ECR, just for testing the workflow.

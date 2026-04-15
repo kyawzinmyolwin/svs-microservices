@@ -8,7 +8,7 @@ FILES=(
 "app-services/frontend_service/app.py"
 )
 
-COMMENT="#Initiate the Runner for TF Assume Role Testing."
+COMMENT="#Initiate the Runner for TF Assume Role Testing. Images not pushed to ECR, just for testing the workflow."
 
 for FILE in "${FILES[@]}"; do
   if [ -f "$FILE" ]; then
